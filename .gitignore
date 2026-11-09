@@ -1,0 +1,8 @@
+# Private: Azure key and personal practice results never go to GitHub
+settings.txt
+settings.txt.txt
+data/
+__pycache__/
+.DS_Store
+# Download package
+*.zip
