@@ -1,0 +1,6 @@
+# Example only. The program creates your real settings.txt the first time it starts,
+# and you can fill it in from the "Setup check" page (no need to edit files).
+AZURE_SPEECH_KEY=paste-KEY-1-here
+AZURE_SPEECH_REGION=westeurope
+VOICE=es-ES-ElviraNeural
+SPEED=-15%

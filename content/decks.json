@@ -1,0 +1,542 @@
+{
+ "decks": [
+  "Basics",
+  "Body & clinic",
+  "Core verbs",
+  "Hard sounds"
+ ],
+ "items": [
+  {
+   "id": "basics-01",
+   "deck": "Basics",
+   "es": "Hola",
+   "en": "Hello",
+   "fr": "Bonjour"
+  },
+  {
+   "id": "basics-02",
+   "deck": "Basics",
+   "es": "Buenos días",
+   "en": "Good morning",
+   "fr": "Bonjour"
+  },
+  {
+   "id": "basics-03",
+   "deck": "Basics",
+   "es": "Buenas tardes",
+   "en": "Good afternoon",
+   "fr": "Bon après-midi"
+  },
+  {
+   "id": "basics-04",
+   "deck": "Basics",
+   "es": "Buenas noches",
+   "en": "Good evening / good night",
+   "fr": "Bonsoir / bonne nuit"
+  },
+  {
+   "id": "basics-05",
+   "deck": "Basics",
+   "es": "Gracias",
+   "en": "Thank you",
+   "fr": "Merci"
+  },
+  {
+   "id": "basics-06",
+   "deck": "Basics",
+   "es": "Por favor",
+   "en": "Please",
+   "fr": "S'il vous plaît"
+  },
+  {
+   "id": "basics-07",
+   "deck": "Basics",
+   "es": "De nada",
+   "en": "You're welcome",
+   "fr": "De rien"
+  },
+  {
+   "id": "basics-08",
+   "deck": "Basics",
+   "es": "Perdone",
+   "en": "Excuse me",
+   "fr": "Excusez-moi"
+  },
+  {
+   "id": "basics-09",
+   "deck": "Basics",
+   "es": "¿Cómo está usted?",
+   "en": "How are you? (formal)",
+   "fr": "Comment allez-vous ?"
+  },
+  {
+   "id": "basics-10",
+   "deck": "Basics",
+   "es": "Muy bien, gracias",
+   "en": "Very well, thank you",
+   "fr": "Très bien, merci"
+  },
+  {
+   "id": "basics-11",
+   "deck": "Basics",
+   "es": "Mucho gusto",
+   "en": "Nice to meet you",
+   "fr": "Enchanté(e)"
+  },
+  {
+   "id": "basics-12",
+   "deck": "Basics",
+   "es": "Hasta luego",
+   "en": "See you later",
+   "fr": "À plus tard"
+  },
+  {
+   "id": "basics-13",
+   "deck": "Basics",
+   "es": "lunes",
+   "en": "Monday",
+   "fr": "lundi"
+  },
+  {
+   "id": "basics-14",
+   "deck": "Basics",
+   "es": "martes",
+   "en": "Tuesday",
+   "fr": "mardi"
+  },
+  {
+   "id": "basics-15",
+   "deck": "Basics",
+   "es": "miércoles",
+   "en": "Wednesday",
+   "fr": "mercredi"
+  },
+  {
+   "id": "basics-16",
+   "deck": "Basics",
+   "es": "jueves",
+   "en": "Thursday",
+   "fr": "jeudi"
+  },
+  {
+   "id": "basics-17",
+   "deck": "Basics",
+   "es": "viernes",
+   "en": "Friday",
+   "fr": "vendredi"
+  },
+  {
+   "id": "basics-18",
+   "deck": "Basics",
+   "es": "sábado",
+   "en": "Saturday",
+   "fr": "samedi"
+  },
+  {
+   "id": "basics-19",
+   "deck": "Basics",
+   "es": "domingo",
+   "en": "Sunday",
+   "fr": "dimanche"
+  },
+  {
+   "id": "basics-20",
+   "deck": "Basics",
+   "es": "¿Qué hora es?",
+   "en": "What time is it?",
+   "fr": "Quelle heure est-il ?"
+  },
+  {
+   "id": "basics-21",
+   "deck": "Basics",
+   "es": "No entiendo",
+   "en": "I don't understand",
+   "fr": "Je ne comprends pas"
+  },
+  {
+   "id": "basics-22",
+   "deck": "Basics",
+   "es": "¿Puede repetir, por favor?",
+   "en": "Can you repeat, please?",
+   "fr": "Pouvez-vous répéter, s'il vous plaît ?"
+  },
+  {
+   "id": "basics-23",
+   "deck": "Basics",
+   "es": "Un vaso de agua",
+   "en": "A glass of water",
+   "fr": "Un verre d'eau"
+  },
+  {
+   "id": "clinic-01",
+   "deck": "Body & clinic",
+   "es": "la cabeza",
+   "en": "the head",
+   "fr": "la tête"
+  },
+  {
+   "id": "clinic-02",
+   "deck": "Body & clinic",
+   "es": "el cuello",
+   "en": "the neck",
+   "fr": "le cou"
+  },
+  {
+   "id": "clinic-03",
+   "deck": "Body & clinic",
+   "es": "el hombro",
+   "en": "the shoulder",
+   "fr": "l'épaule"
+  },
+  {
+   "id": "clinic-04",
+   "deck": "Body & clinic",
+   "es": "el codo",
+   "en": "the elbow",
+   "fr": "le coude"
+  },
+  {
+   "id": "clinic-05",
+   "deck": "Body & clinic",
+   "es": "la muñeca",
+   "en": "the wrist",
+   "fr": "le poignet"
+  },
+  {
+   "id": "clinic-06",
+   "deck": "Body & clinic",
+   "es": "la espalda",
+   "en": "the back",
+   "fr": "le dos"
+  },
+  {
+   "id": "clinic-07",
+   "deck": "Body & clinic",
+   "es": "la cadera",
+   "en": "the hip",
+   "fr": "la hanche"
+  },
+  {
+   "id": "clinic-08",
+   "deck": "Body & clinic",
+   "es": "la rodilla",
+   "en": "the knee",
+   "fr": "le genou"
+  },
+  {
+   "id": "clinic-09",
+   "deck": "Body & clinic",
+   "es": "el tobillo",
+   "en": "the ankle",
+   "fr": "la cheville"
+  },
+  {
+   "id": "clinic-10",
+   "deck": "Body & clinic",
+   "es": "el pie",
+   "en": "the foot",
+   "fr": "le pied"
+  },
+  {
+   "id": "clinic-11",
+   "deck": "Body & clinic",
+   "es": "los músculos",
+   "en": "the muscles",
+   "fr": "les muscles"
+  },
+  {
+   "id": "clinic-12",
+   "deck": "Body & clinic",
+   "es": "¿Dónde le duele?",
+   "en": "Where does it hurt?",
+   "fr": "Où avez-vous mal ?"
+  },
+  {
+   "id": "clinic-13",
+   "deck": "Body & clinic",
+   "es": "¿Desde cuándo le duele?",
+   "en": "Since when has it been hurting?",
+   "fr": "Depuis quand avez-vous mal ?"
+  },
+  {
+   "id": "clinic-14",
+   "deck": "Body & clinic",
+   "es": "¿Le duele aquí?",
+   "en": "Does it hurt here?",
+   "fr": "Vous avez mal ici ?"
+  },
+  {
+   "id": "clinic-15",
+   "deck": "Body & clinic",
+   "es": "Del uno al diez, ¿cuánto le duele?",
+   "en": "From one to ten, how much does it hurt?",
+   "fr": "De un à dix, à quel point avez-vous mal ?"
+  },
+  {
+   "id": "clinic-16",
+   "deck": "Body & clinic",
+   "es": "Doble la rodilla",
+   "en": "Bend your knee",
+   "fr": "Pliez le genou"
+  },
+  {
+   "id": "clinic-17",
+   "deck": "Body & clinic",
+   "es": "Estire la pierna",
+   "en": "Stretch your leg",
+   "fr": "Tendez la jambe"
+  },
+  {
+   "id": "clinic-18",
+   "deck": "Body & clinic",
+   "es": "Levante el brazo",
+   "en": "Raise your arm",
+   "fr": "Levez le bras"
+  },
+  {
+   "id": "clinic-19",
+   "deck": "Body & clinic",
+   "es": "Respire hondo",
+   "en": "Breathe deeply",
+   "fr": "Respirez profondément"
+  },
+  {
+   "id": "clinic-20",
+   "deck": "Body & clinic",
+   "es": "Relájese",
+   "en": "Relax",
+   "fr": "Détendez-vous"
+  },
+  {
+   "id": "clinic-21",
+   "deck": "Body & clinic",
+   "es": "Acuéstese boca arriba",
+   "en": "Lie on your back",
+   "fr": "Allongez-vous sur le dos"
+  },
+  {
+   "id": "clinic-22",
+   "deck": "Body & clinic",
+   "es": "Acuéstese boca abajo",
+   "en": "Lie on your stomach",
+   "fr": "Allongez-vous sur le ventre"
+  },
+  {
+   "id": "clinic-23",
+   "deck": "Body & clinic",
+   "es": "Vamos a hacer unos ejercicios",
+   "en": "We are going to do some exercises",
+   "fr": "Nous allons faire quelques exercices"
+  },
+  {
+   "id": "verbs-01",
+   "deck": "Core verbs",
+   "es": "ser",
+   "en": "to be (identity, permanent)",
+   "fr": "être (identité)"
+  },
+  {
+   "id": "verbs-02",
+   "deck": "Core verbs",
+   "es": "estar",
+   "en": "to be (state, location)",
+   "fr": "être (état, lieu)"
+  },
+  {
+   "id": "verbs-03",
+   "deck": "Core verbs",
+   "es": "tener",
+   "en": "to have",
+   "fr": "avoir"
+  },
+  {
+   "id": "verbs-04",
+   "deck": "Core verbs",
+   "es": "hacer",
+   "en": "to do, to make",
+   "fr": "faire"
+  },
+  {
+   "id": "verbs-05",
+   "deck": "Core verbs",
+   "es": "ir",
+   "en": "to go",
+   "fr": "aller"
+  },
+  {
+   "id": "verbs-06",
+   "deck": "Core verbs",
+   "es": "poder",
+   "en": "to be able to, can",
+   "fr": "pouvoir"
+  },
+  {
+   "id": "verbs-07",
+   "deck": "Core verbs",
+   "es": "decir",
+   "en": "to say, to tell",
+   "fr": "dire"
+  },
+  {
+   "id": "verbs-08",
+   "deck": "Core verbs",
+   "es": "querer",
+   "en": "to want",
+   "fr": "vouloir"
+  },
+  {
+   "id": "verbs-09",
+   "deck": "Core verbs",
+   "es": "venir",
+   "en": "to come",
+   "fr": "venir"
+  },
+  {
+   "id": "verbs-10",
+   "deck": "Core verbs",
+   "es": "saber",
+   "en": "to know (facts)",
+   "fr": "savoir"
+  },
+  {
+   "id": "verbs-11",
+   "deck": "Core verbs",
+   "es": "Soy fisioterapeuta",
+   "en": "I am a physiotherapist",
+   "fr": "Je suis kinésithérapeute"
+  },
+  {
+   "id": "verbs-12",
+   "deck": "Core verbs",
+   "es": "Estoy un poco cansado",
+   "en": "I'm a bit tired",
+   "fr": "Je suis un peu fatigué"
+  },
+  {
+   "id": "verbs-13",
+   "deck": "Core verbs",
+   "es": "Tengo dolor de espalda",
+   "en": "I have back pain",
+   "fr": "J'ai mal au dos"
+  },
+  {
+   "id": "verbs-14",
+   "deck": "Core verbs",
+   "es": "¿Puede caminar?",
+   "en": "Can you walk?",
+   "fr": "Pouvez-vous marcher ?"
+  },
+  {
+   "id": "verbs-15",
+   "deck": "Core verbs",
+   "es": "Voy a la clínica",
+   "en": "I'm going to the clinic",
+   "fr": "Je vais à la clinique"
+  },
+  {
+   "id": "verbs-16",
+   "deck": "Core verbs",
+   "es": "Hago ejercicio todos los días",
+   "en": "I exercise every day",
+   "fr": "Je fais de l'exercice tous les jours"
+  },
+  {
+   "id": "verbs-17",
+   "deck": "Core verbs",
+   "es": "Quiero aprender español",
+   "en": "I want to learn Spanish",
+   "fr": "Je veux apprendre l'espagnol"
+  },
+  {
+   "id": "sounds-01",
+   "deck": "Hard sounds",
+   "es": "perro",
+   "en": "dog (rolled rr)",
+   "fr": "chien (rr roulé)"
+  },
+  {
+   "id": "sounds-02",
+   "deck": "Hard sounds",
+   "es": "pero",
+   "en": "but (single tap r)",
+   "fr": "mais (r battu simple)"
+  },
+  {
+   "id": "sounds-03",
+   "deck": "Hard sounds",
+   "es": "El perro corre rápido",
+   "en": "The dog runs fast",
+   "fr": "Le chien court vite"
+  },
+  {
+   "id": "sounds-04",
+   "deck": "Hard sounds",
+   "es": "Rápido ruedan los carros del ferrocarril",
+   "en": "The railway carriages roll fast",
+   "fr": "Les wagons du chemin de fer roulent vite"
+  },
+  {
+   "id": "sounds-05",
+   "deck": "Hard sounds",
+   "es": "La rodilla derecha",
+   "en": "The right knee",
+   "fr": "Le genou droit"
+  },
+  {
+   "id": "sounds-06",
+   "deck": "Hard sounds",
+   "es": "La jirafa juega en el jardín",
+   "en": "The giraffe plays in the garden",
+   "fr": "La girafe joue dans le jardin"
+  },
+  {
+   "id": "sounds-07",
+   "deck": "Hard sounds",
+   "es": "Juan trabaja en Jerez",
+   "en": "Juan works in Jerez",
+   "fr": "Juan travaille à Jerez"
+  },
+  {
+   "id": "sounds-08",
+   "deck": "Hard sounds",
+   "es": "El niño tiene sueño",
+   "en": "The child is sleepy",
+   "fr": "L'enfant a sommeil"
+  },
+  {
+   "id": "sounds-09",
+   "deck": "Hard sounds",
+   "es": "Mañana voy a España",
+   "en": "Tomorrow I'm going to Spain",
+   "fr": "Demain je vais en Espagne"
+  },
+  {
+   "id": "sounds-10",
+   "deck": "Hard sounds",
+   "es": "Todos los dedos de la mano",
+   "en": "All the fingers of the hand",
+   "fr": "Tous les doigts de la main"
+  },
+  {
+   "id": "sounds-11",
+   "deck": "Hard sounds",
+   "es": "Madrid es una ciudad grande",
+   "en": "Madrid is a big city",
+   "fr": "Madrid est une grande ville"
+  },
+  {
+   "id": "sounds-12",
+   "deck": "Hard sounds",
+   "es": "Cuidado con el cuello",
+   "en": "Careful with the neck",
+   "fr": "Attention au cou"
+  },
+  {
+   "id": "sounds-13",
+   "deck": "Hard sounds",
+   "es": "Cinco zapatos azules",
+   "en": "Five blue shoes",
+   "fr": "Cinq chaussures bleues"
+  }
+ ]
+}

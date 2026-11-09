@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spanish Pronunciation Practice</title>
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">🇪🇸 Spanish Pronunciation</div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-view="practice">Practise</button>
+    <button class="tab" data-view="progress">My progress</button>
+    <button class="tab" data-view="words">My words</button>
+    <button class="tab" data-view="setup">Setup check</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ======================= PRACTICE ======================= -->
+  <section id="view-practice" class="view active">
+    <div class="row deckrow">
+      <label for="deck">Deck:</label>
+      <select id="deck"></select>
+      <span id="why" class="badge"></span>
+    </div>
+
+    <div class="card" id="card">
+      <div class="es" id="es">…</div>
+      <div class="tr"><span class="flag">EN</span> <span id="en"></span></div>
+      <div class="tr"><span class="flag">FR</span> <span id="fr"></span></div>
+    </div>
+
+    <div class="buttons">
+      <button id="btn-listen" class="big listen" title="Keyboard: L">🔊 Listen</button>
+      <button id="btn-slow" class="big slow" title="Keyboard: S">🐢 Slower</button>
+      <button id="btn-record" class="big record" title="Keyboard: R">🎤 Record</button>
+      <button id="btn-me" class="big me" disabled title="Keyboard: M">👂 Hear myself</button>
+      <button id="btn-next" class="big next" title="Keyboard: N">Next ➡</button>
+    </div>
+    <div id="status" class="status" aria-live="polite"></div>
+
+    <div id="result" class="result hidden">
+      <div class="scores">
+        <div class="score main"><div class="num" id="s-overall">0</div><div class="lbl">Overall</div></div>
+        <div class="score"><div class="num" id="s-accuracy">0</div><div class="lbl">Accuracy</div></div>
+        <div class="score"><div class="num" id="s-fluency">0</div><div class="lbl">Fluency</div></div>
+        <div class="score"><div class="num" id="s-complete">0</div><div class="lbl">Completeness</div></div>
+      </div>
+      <div class="words" id="words"></div>
+      <div class="legend"><span class="dot good"></span> good (80+) <span class="dot ok"></span> almost (60–79) <span class="dot bad"></span> needs work (below 60) — click a word to see its sounds</div>
+      <div id="tips" class="tips"></div>
+      <div id="attempts" class="attempts"></div>
+    </div>
+    <p class="hint">Shortcuts: <kbd>L</kbd> listen · <kbd>S</kbd> slower · <kbd>R</kbd> record · <kbd>M</kbd> hear myself · <kbd>N</kbd> next</p>
+  </section>
+
+  <!-- ======================= PROGRESS ======================= -->
+  <section id="view-progress" class="view">
+    <h2>My progress</h2>
+    <div class="tiles" id="tiles"></div>
+    <h3>Average score per day <small>(first try on each item)</small></h3>
+    <div id="chart" class="chart"></div>
+    <div class="two-col">
+      <div>
+        <h3>Sounds to work on</h3>
+        <div id="sound-list"></div>
+      </div>
+      <div>
+        <h3>Words &amp; phrases to work on</h3>
+        <div id="weak-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= MY WORDS ======================= -->
+  <section id="view-words" class="view">
+    <h2>Add your own word or sentence</h2>
+    <form id="add-form" class="add-form">
+      <label>Spanish <input id="add-es" required placeholder="e.g. Gire la cabeza a la derecha"></label>
+      <label>English <input id="add-en" placeholder="e.g. Turn your head to the right"></label>
+      <label>French <input id="add-fr" placeholder="e.g. Tournez la tête à droite"></label>
+      <label>Deck <input id="add-deck" list="deck-names" value="My words"></label>
+      <datalist id="deck-names"></datalist>
+      <div class="row">
+        <button type="button" id="add-listen" class="mid">🔊 Hear it</button>
+        <button type="submit" class="mid primary">➕ Add</button>
+        <span id="add-msg" class="status"></span>
+      </div>
+    </form>
+    <h2>All words and sentences</h2>
+    <div id="all-items"></div>
+  </section>
+
+  <!-- ======================= SETUP CHECK ======================= -->
+  <section id="view-setup" class="view">
+    <h2>Setup check</h2>
+    <p>Run these four checks in order. Each one turns green when it works.</p>
+    <ol class="checks">
+      <li id="chk-settings"><div class="chk-head"><span class="mark">…</span> <b>1. Azure key and region</b></div><div class="chk-body"></div>
+        <form id="key-form" class="key-form">
+          <label>KEY 1 <input id="key-input" type="password" autocomplete="off" placeholder="Paste KEY 1 from the Azure portal"></label>
+          <label>Region <input id="region-input" list="regions" placeholder="e.g. westeurope"></label>
+          <datalist id="regions"><option value="westeurope"><option value="northeurope"><option value="francecentral"><option value="swedencentral"><option value="uksouth"><option value="eastus"><option value="westus2"></datalist>
+          <button type="submit" class="mid primary">Save</button>
+        </form>
+        <div class="hint">Your key is saved only in <code>settings.txt</code> on this computer.</div></li>
+      <li id="chk-azure"><div class="chk-head"><span class="mark">…</span> <b>2. Azure connection</b> <button class="mid" id="run-azure">Test</button></div><div class="chk-body"></div></li>
+      <li id="chk-mic"><div class="chk-head"><span class="mark">…</span> <b>3. Microphone</b> <button class="mid" id="run-mic">Test</button></div>
+        <div class="chk-body"></div><div class="meter hidden" id="meter"><div id="meter-bar"></div></div></li>
+      <li id="chk-pron"><div class="chk-head"><span class="mark">…</span> <b>4. Pronunciation test</b> <button class="mid" id="run-pron">Test</button></div><div class="chk-body"></div></li>
+    </ol>
+  </section>
+</main>
+
+<div id="tooltip" class="tooltip hidden"></div>
+<script src="vendor/speech-sdk.min.js"></script>
+<script src="sounds.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
