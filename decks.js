@@ -1,4 +1,5 @@
-{
+/* Built-in practice decks. To add your own words, use the "My words" page in the app. */
+window.BUILTIN_DECKS = {
  "decks": [
   "Basics",
   "Body & clinic",
@@ -539,4 +540,4 @@
    "fr": "Cinq chaussures bleues"
   }
  ]
-}
+};

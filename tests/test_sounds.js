@@ -1,5 +1,5 @@
 // Run with: node tests/test_sounds.js
-const S = require("../web/sounds.js");
+const S = require("../sounds.js");
 const assert = require("assert");
 const show = (s) => S.sentenceToSounds(s).map(w => w.clean + "=" + w.units.map(u => u.spelling + ":" + u.key).join(" ")).join(" | ");
 
