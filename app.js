@@ -151,6 +151,25 @@
     return buf;
   }
 
+  // Scoring settings, from most detailed to simplest. The level that works
+  // with this Azure resource is remembered on the iPad.
+  var SCORING_LEVELS = [
+    { granularity: "Phoneme", miscue: true },
+    { granularity: "Phoneme", miscue: false },
+    { granularity: "Word", miscue: false },
+    { granularity: "FullText", miscue: false }
+  ];
+  function scoringLevel() {
+    var n = parseInt(localStorage.getItem("scoringLevel") || "0", 10);
+    return n >= 0 && n < SCORING_LEVELS.length ? n : 0;
+  }
+  function rememberScoringLevel(n) { try { localStorage.setItem("scoringLevel", String(n)); } catch (e) {} }
+  function scoringConfig(referenceText, level) {
+    var l = SCORING_LEVELS[level];
+    return new SDK.PronunciationAssessmentConfig(referenceText,
+      SDK.PronunciationAssessmentGradingSystem.HundredMark, SDK.PronunciationAssessmentGranularity[l.granularity], l.miscue);
+  }
+
   /*
    * Record and score. Returns a controller {promise, stop()}.
    * onLevel(0..1) is called while listening, onListening() once the mic is on.
@@ -196,26 +215,49 @@
 
         cfg.setProperty(SDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "8000");
         cfg.setProperty(SDK.PropertyId.Speech_SegmentationSilenceTimeoutMs, "1300");
+        var level = scoringLevel();
         var rec = new SDK.SpeechRecognizer(cfg, SDK.AudioConfig.fromStreamInput(pushStream));
-        var pa = new SDK.PronunciationAssessmentConfig(referenceText,
-          SDK.PronunciationAssessmentGradingSystem.HundredMark, SDK.PronunciationAssessmentGranularity.Phoneme, true);
-        pa.applyTo(rec);
+        scoringConfig(referenceText, level).applyTo(rec);
         var safety = setTimeout(ctl.stop, 20000); // never record forever
         if (onListening) onListening();
         rec.recognizeOnceAsync(function (result) {
           clearTimeout(safety); stopped = true; cleanup(); rec.close();
           var recording = chunks.length ? wavFromChunks(chunks, RATE) : null;
+          handleResult(result, level, recording);
+        }, function (err) {
+          clearTimeout(safety); stopped = true; cleanup(); rec.close();
+          failed(String(err), level, chunks.length ? wavFromChunks(chunks, RATE) : null);
+        });
+
+        function handleResult(result, lvl, recording) {
           if (result.reason === SDK.ResultReason.RecognizedSpeech) {
+            rememberScoringLevel(lvl);
             resolve({ json: JSON.parse(result.properties.getProperty(SDK.PropertyId.SpeechServiceResponse_JsonResult)), recording: recording });
           } else if (result.reason === SDK.ResultReason.NoMatch) {
             reject(new Error("I didn't hear any Spanish. Tap Record, then speak clearly towards the iPad."));
           } else {
-            reject(new Error(friendly(SDK.CancellationDetails.fromResult(result).errorDetails)));
+            failed(SDK.CancellationDetails.fromResult(result).errorDetails, lvl, recording);
           }
-        }, function (err) {
-          clearTimeout(safety); stopped = true; cleanup(); rec.close();
-          reject(new Error(friendly(err)));
-        });
+        }
+        // Azure sometimes refuses the detailed scoring request ("Could not
+        // validate speech context", websocket 1007). Then score the SAME
+        // recording again with simpler settings — no need to speak twice.
+        function failed(details, lvl, recording) {
+          if (/1007|speech context/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
+            var next = lvl + 1;
+            rememberScoringLevel(next);
+            var replay = SDK.AudioInputStream.createPushStream(SDK.AudioStreamFormat.getWaveFormatPCM(RATE, 16, 1));
+            chunks.forEach(function (c) { replay.write(c.buffer.slice(0)); });
+            replay.close();
+            var cfg2 = speechConfig();
+            var rec2 = new SDK.SpeechRecognizer(cfg2, SDK.AudioConfig.fromStreamInput(replay));
+            scoringConfig(referenceText, next).applyTo(rec2);
+            rec2.recognizeOnceAsync(function (r2) { rec2.close(); handleResult(r2, next, recording); },
+              function (e2) { rec2.close(); failed(String(e2), next, recording); });
+            return;
+          }
+          reject(new Error(friendly(details)));
+        }
       }).catch(function (err) {
         reject(new Error(err && err.name === "NotAllowedError"
           ? "The microphone is blocked. On iPad: Settings app → Safari → Microphone → Allow (or tap 'aA' in the address bar → Website Settings → Microphone → Allow)."
