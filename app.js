@@ -29,9 +29,10 @@
   // "unlocks" one shared AudioContext, and all sound goes through it.
   var AC = null, currentSource = null;
   // On iPads, web audio is silenced by Silent Mode (even at full volume).
-  // Asking for the "playback" audio session (Safari 16.4+), and playing a
-  // short silent <audio> clip inside the first tap (older iPads), makes the
-  // app play like a music app instead.
+  // Ask for the "playback" audio session once, when the app opens (Safari
+  // 16.4+). Changing it later, while sound is starting, can pause the audio.
+  // Older iPads: play a short silent <audio> clip inside the first tap.
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
   function silentWavUrl() {
     var n = 2205, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
     function str(o, t) { for (var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
@@ -41,16 +42,15 @@
     str(36, "data"); v.setUint32(40, n * 2, true);
     return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
   }
-  var mediaUnlocked = false;
+  var mediaUnlocked = !!navigator.audioSession;
   function unlockMediaPlayback() {
-    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
     if (mediaUnlocked) return;
     mediaUnlocked = true;
     try {
       var el = new Audio(silentWavUrl());
-      el.setAttribute("playsinline", ""); el.volume = 0.01;
-      var p = el.play(); if (p && p.catch) p.catch(function () { mediaUnlocked = false; });
-    } catch (e) { mediaUnlocked = false; }
+      el.setAttribute("playsinline", "");
+      var p = el.play(); if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
   }
   function audio() {
     unlockMediaPlayback();
@@ -59,7 +59,7 @@
       var b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource(); // silent unlock
       s.buffer = b; s.connect(AC.destination); s.start(0);
     }
-    if (AC.state === "suspended") AC.resume();
+    if (AC.state !== "running") { try { AC.resume(); } catch (e) {} }
     return AC;
   }
   function stopPlayback() { if (currentSource) { try { currentSource.stop(); } catch (e) {} currentSource = null; } }
@@ -69,7 +69,14 @@
     var src = ctx.createBufferSource();
     src.buffer = buf; src.connect(ctx.destination);
     currentSource = src;
-    return new Promise(function (resolve) { src.onended = function () { if (currentSource === src) currentSource = null; resolve(); }; src.start(0); });
+    return new Promise(function (resolve) {
+      var done = false;
+      function finish() { if (done) return; done = true; if (currentSource === src) currentSource = null; resolve(); }
+      src.onended = finish;
+      // Never wait forever: if the iPad paused the audio, carry on anyway.
+      setTimeout(finish, buf.duration * 1000 + 2000);
+      src.start(0);
+    });
   }
   function decode(arrayBuffer) {
     var ctx = audio();
@@ -436,7 +443,14 @@
   function Store_keyOk(k) { return PracticeStore.keyLooksValid(k); }
   function checkAzure() {
     check("chk-azure", null, "Contacting Azure…");
-    speak("Hola, vamos a practicar.", false).then(function () {
+    var timeout = new Promise(function (_, reject) {
+      setTimeout(function () {
+        var e = new Error("Azure did not answer within 20 seconds.");
+        e.help = "Check the Wi-Fi, then close the app completely (swipe it away) and open it again.";
+        reject(e);
+      }, 20000);
+    });
+    Promise.race([speak("Hola, vamos a practicar.", false), timeout]).then(function () {
       check("chk-azure", true, "Connected to Azure. You should have heard “Hola, vamos a practicar.” If you heard nothing: turn up the volume, and open Control Center (swipe down from the top-right corner) — if the bell (Silent Mode) is on, tap it off, then test again.");
     }).catch(function (e) { check("chk-azure", false, esc(e.message) + (e.help ? "<br>" + esc(e.help) : "")); });
   }
