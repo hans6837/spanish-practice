@@ -56,6 +56,7 @@
   }
   function audio() {
     unlockMediaPlayback();
+    mediaPlayer();
     if (!AC) {
       AC = new (window.AudioContext || window.webkitAudioContext)();
       var b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource(); // silent unlock
@@ -64,20 +65,52 @@
     if (AC.state !== "running") { try { AC.resume(); } catch (e) {} }
     return AC;
   }
-  function stopPlayback() { if (currentSource) { try { currentSource.stop(); } catch (e) {} currentSource = null; } }
-  function playBuffer(buf) {
-    var ctx = audio();
+  // Speech and recordings play through one shared <audio> element (like a
+  // video), not through web audio: on iPads web audio can go silent after the
+  // microphone has been used, or in Silent Mode. The element is "unlocked"
+  // with a silent clip inside the first tap, so later plays are allowed.
+  var player = null, playerUnlocked = false, playerUrl = null, playerDone = null;
+  function mediaPlayer() {
+    if (!player) {
+      player = document.createElement("audio");
+      player.setAttribute("playsinline", ""); player.preload = "auto";
+      document.body.appendChild(player);
+    }
+    if (!playerUnlocked) {
+      playerUnlocked = true;
+      try {
+        player.src = silentWavUrl();
+        var p = player.play();
+        if (p && p.catch) p.catch(function () { playerUnlocked = false; });
+      } catch (e) { playerUnlocked = false; }
+    }
+    return player;
+  }
+  function stopPlayback() {
+    if (player) { try { player.pause(); } catch (e) {} }
+    if (playerDone) { var d = playerDone; playerDone = null; d(); }
+  }
+  // data: ArrayBuffer of MP3 (Azure voice) or WAV (your recording)
+  function playAudioData(data, mime) {
+    var el = mediaPlayer();
     stopPlayback();
-    var src = ctx.createBufferSource();
-    src.buffer = buf; src.connect(ctx.destination);
-    currentSource = src;
-    return new Promise(function (resolve) {
+    if (playerUrl) { URL.revokeObjectURL(playerUrl); playerUrl = null; }
+    playerUrl = URL.createObjectURL(new Blob([data], { type: mime }));
+    return new Promise(function (resolve, reject) {
       var done = false;
-      function finish() { if (done) return; done = true; if (currentSource === src) currentSource = null; resolve(); }
-      src.onended = finish;
-      // Never wait forever: if the iPad paused the audio, carry on anyway.
-      setTimeout(finish, buf.duration * 1000 + 2000);
-      src.start(0);
+      function finish() { if (done) return; done = true; el.onended = el.onerror = null; if (playerDone === finish) playerDone = null; resolve(); }
+      playerDone = finish;
+      el.onended = finish;
+      el.onerror = function () { finish(); };
+      el.src = playerUrl;
+      el.volume = 1;
+      var p = el.play();
+      if (p && p.catch) p.catch(function (e) {
+        done = true; playerDone = null;
+        var err = new Error("The iPad blocked the sound. Tap the button again.");
+        err.help = String(e && e.message || e); reject(err);
+      });
+      setTimeout(finish, 30000); // never wait forever
     });
   }
   function decode(arrayBuffer) {
@@ -108,7 +141,7 @@
     var ctx = audio();
     var s = store.settings(), rate = slow ? "-40%" : (s.speed || "-15%"), voice = s.voice || "es-ES-ElviraNeural";
     var cacheKey = voice + "|" + rate + "|" + text;
-    if (state.audioCache[cacheKey]) return playBuffer(state.audioCache[cacheKey]);
+    if (state.audioCache[cacheKey]) return playAudioData(state.audioCache[cacheKey], "audio/mpeg");
     return new Promise(function (resolve, reject) {
       var cfg;
       try { cfg = speechConfig(); } catch (e) { return reject(e); }
@@ -121,10 +154,9 @@
         if (result.reason === SDK.ResultReason.SynthesizingAudioCompleted) resolve(result.audioData);
         else reject(new Error(friendly(result.errorDetails)));
       }, function (err) { synth.close(); reject(new Error(friendly(err))); });
-    }).then(decode).then(function (buf) {
-      state.audioCache[cacheKey] = buf;
-      if (ctx.state !== "running") ctx.resume();
-      return playBuffer(buf);
+    }).then(function (mp3) {
+      state.audioCache[cacheKey] = mp3;
+      return playAudioData(mp3, "audio/mpeg");
     });
   }
   function speakFallback(text, slow) {
@@ -325,7 +357,7 @@
       state.attemptsThisItem.push(a.overall);
       showResult(a);
       if (res.recording) {
-        decode(res.recording).then(function (buf) { state.lastRecording = buf; $("btn-me").disabled = false; }).catch(function () {});
+        if (res.recording) { state.lastRecording = res.recording; $("btn-me").disabled = false; }
       }
       var saved = store.recordAttempt({ item_id: item.id, first: first, overall: a.overall, accuracy: a.accuracy,
         fluency: a.fluency, completeness: a.completeness, sounds: a.sounds });
@@ -554,7 +586,7 @@
   $("btn-listen").addEventListener("click", function () { listen(false); });
   $("btn-slow").addEventListener("click", function () { listen(true); });
   $("btn-record").addEventListener("click", record);
-  $("btn-me").addEventListener("click", function () { if (state.lastRecording && !state.recording) playBuffer(state.lastRecording); });
+  $("btn-me").addEventListener("click", function () { if (state.lastRecording && !state.recording) playAudioData(state.lastRecording, "audio/wav").catch(function (e) { setStatus(e.message, true); }); });
   $("btn-next").addEventListener("click", function () { if (!state.recording) { stopPlayback(); nextItem(); } });
   $("deck").addEventListener("change", function (e) {
     state.deck = e.target.value; try { localStorage.setItem("spanishPractice.deck", state.deck); } catch (er) {}
