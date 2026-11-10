@@ -133,6 +133,7 @@
     if (/401|403|auth|subscription|key/i.test(d)) return "Azure refused the key. Check KEY 1 and the region on the Setup tab. (" + d + ")";
     if (/quota|429|throttl/i.test(d)) return "The free Azure allowance is used up for now (free tier limit). Try again later. (" + d + ")";
     if (/1006|websocket|network|connect/i.test(d)) return "Could not connect to Azure. Check the Wi-Fi and that the region is correct. (" + d + ")";
+    if (/internal (server )?error/i.test(d)) return "Azure had a temporary problem scoring this recording. (" + d + ")";
     return "Azure problem: " + d;
   }
 
@@ -275,9 +276,8 @@
         // validate speech context", websocket 1007). Then score the SAME
         // recording again with simpler settings — no need to speak twice.
         function failed(details, lvl, recording) {
-          if (/1007|speech context/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
-            var next = lvl + 1;
-            rememberScoringLevel(next);
+          if (/1007|1011|speech context|internal (server )?error/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
+            var next = lvl + 1; // remembered only once it actually works (handleResult)
             var replay = SDK.AudioInputStream.createPushStream(SDK.AudioStreamFormat.getWaveFormatPCM(RATE, 16, 1));
             chunks.forEach(function (c) { replay.write(c.buffer.slice(0)); });
             replay.close();
@@ -288,7 +288,9 @@
               function (e2) { rec2.close(); failed(String(e2), next, recording); });
             return;
           }
-          reject(new Error(friendly(details)));
+          var err = new Error(friendly(details));
+          err.recording = recording; // so "Hear myself" still works
+          reject(err);
         }
       }).catch(function (err) {
         reject(new Error(err && err.name === "NotAllowedError"
@@ -364,7 +366,9 @@
       setStatus(saved.saved ? (first ? "Tap 🎤 Record to try again, or Next ➡ to move on." : "Try as often as you like.")
                             : "Warning: your result could not be saved (iPad storage full or blocked).", !saved.saved);
     }).catch(function (e) {
-      setStatus(e.message + (e.help ? " " + e.help : ""), true);
+      if (e.recording && state.item === item) { state.lastRecording = e.recording; $("btn-me").disabled = false; }
+      setStatus(e.message + (e.help ? " " + e.help : "") +
+        (e.recording ? " You can still tap 👂 Hear myself, or 🎤 Record to try again." : ""), true);
     }).then(function () {
       state.recording = null;
       btn.classList.remove("recording"); btn.textContent = "🎤 Record";
