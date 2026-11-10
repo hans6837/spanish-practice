@@ -8,7 +8,7 @@ Your Azure key and your results are stored **only on your iPad**, never in this 
 
 ## Opening it
 
-Open the program's web address in **Safari**, then tap **Share** (square with an arrow) →
+Open the program's web address, **https://hans6837.github.io/spanish-practice/**, in **Safari**, then tap **Share** (square with an arrow) →
 **Add to Home Screen** → **Add**. From then on, open it with the **Español** icon.
 (Using the icon also keeps your results safe: Safari may delete data of websites you haven't visited for a while.)
 
