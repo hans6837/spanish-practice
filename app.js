@@ -28,7 +28,32 @@
   // iPads only allow sound that starts from a tap, so every button first
   // "unlocks" one shared AudioContext, and all sound goes through it.
   var AC = null, currentSource = null;
+  // On iPads, web audio is silenced by Silent Mode (even at full volume).
+  // Asking for the "playback" audio session (Safari 16.4+), and playing a
+  // short silent <audio> clip inside the first tap (older iPads), makes the
+  // app play like a music app instead.
+  function silentWavUrl() {
+    var n = 2205, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    function str(o, t) { for (var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
+    str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVE"); str(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 22050, true); v.setUint32(28, 44100, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    str(36, "data"); v.setUint32(40, n * 2, true);
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  }
+  var mediaUnlocked = false;
+  function unlockMediaPlayback() {
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    if (mediaUnlocked) return;
+    mediaUnlocked = true;
+    try {
+      var el = new Audio(silentWavUrl());
+      el.setAttribute("playsinline", ""); el.volume = 0.01;
+      var p = el.play(); if (p && p.catch) p.catch(function () { mediaUnlocked = false; });
+    } catch (e) { mediaUnlocked = false; }
+  }
   function audio() {
+    unlockMediaPlayback();
     if (!AC) {
       AC = new (window.AudioContext || window.webkitAudioContext)();
       var b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource(); // silent unlock
@@ -412,7 +437,7 @@
   function checkAzure() {
     check("chk-azure", null, "Contacting Azure…");
     speak("Hola, vamos a practicar.", false).then(function () {
-      check("chk-azure", true, "Connected to Azure. You should have heard “Hola, vamos a practicar.” If you heard nothing, turn up the volume and check the iPad is not muted.");
+      check("chk-azure", true, "Connected to Azure. You should have heard “Hola, vamos a practicar.” If you heard nothing: turn up the volume, and open Control Center (swipe down from the top-right corner) — if the bell (Silent Mode) is on, tap it off, then test again.");
     }).catch(function (e) { check("chk-azure", false, esc(e.message) + (e.help ? "<br>" + esc(e.help) : "")); });
   }
   function checkMic() {
