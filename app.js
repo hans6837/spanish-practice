@@ -29,10 +29,12 @@
   // "unlocks" one shared AudioContext, and all sound goes through it.
   var AC = null, currentSource = null;
   // On iPads, web audio is silenced by Silent Mode (even at full volume).
-  // Ask for the "playback" audio session once, when the app opens (Safari
-  // 16.4+). Changing it later, while sound is starting, can pause the audio.
-  // Older iPads: play a short silent <audio> clip inside the first tap.
-  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+  // Ask for the "play-and-record" audio session once, when the app opens
+  // (Safari 16.4+): it plays in Silent Mode AND allows the microphone
+  // ("playback" alone blocks recording). Changing it later, while sound is
+  // starting, can pause the audio. Older iPads: play a short silent <audio>
+  // clip inside the first tap.
+  try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch (e) {}
   function silentWavUrl() {
     var n = 2205, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
     function str(o, t) { for (var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
