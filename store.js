@@ -356,13 +356,33 @@
     }
     return { card: null, why: "done" };
   };
-  Store.prototype.recordVocab = function (key, dir, ok, now) {
-    now = now || Date.now();
+  /*
+   * Difficult words: each miss adds 2 "difficulty points", each right answer
+   * removes 1. A word with points is "difficult": it opens your next tests and
+   * never waits more than a day. A right word with weak pronunciation (opts.weakPron)
+   * adds 1 point.
+   */
+  function struggle(c) {
+    if (!c) return 0;
+    if (c.struggle != null) return c.struggle;
+    return Math.max(0, Math.min(6, (c.wrong || 0) * 2 - (c.right || 0)));   // cards saved before this feature
+  }
+  Store.struggle = struggle;
+  Store.prototype.recordVocab = function (key, dir, ok, now, opts) {
+    now = now || Date.now(); opts = opts || {};
     var id = dir + "|" + key;
     var c = this.data.vocab[id] || { level: 0, seen: 0, right: 0, wrong: 0 };
+    var pts = struggle(c);
+    if (!ok) pts = Math.min(6, pts + 2);
+    else if (opts.weakPron) pts = Math.min(6, pts + 1);
+    else pts = Math.max(0, pts - 1);
+    c.struggle = pts;
+    if (!ok) c.everMissed = true;
     c.level = ok ? Math.min((c.seen ? c.level : 0) + 1, VOCAB_INTERVALS.length - 1) : 0;
     c.seen++; if (ok) c.right++; else c.wrong++;
-    c.last = now; c.due = now + VOCAB_INTERVALS[ok ? c.level : 0];
+    var gap = VOCAB_INTERVALS[ok ? c.level : 0];
+    if (ok && pts > 0) gap = Math.min(gap, DAY);              // difficult words come back within a day
+    c.last = now; c.due = now + gap;
     this.data.vocab[id] = c;
     this.data.vocabLog.push({ t: now, k: key, d: dir, ok: ok ? 1 : 0 });
     if (this.data.vocabLog.length > 5000) this.data.vocabLog = this.data.vocabLog.slice(-5000);
@@ -376,6 +396,15 @@
     for (var i = log.length - 1; i >= 0; i--) if (log[i].k === key && log[i].d === dir) { log.splice(i, 1); break; }
     return this.recordVocab(key, dir, true, now);
   };
+  /* Your difficult words (cards with difficulty points), hardest first. */
+  Store.prototype.difficultCards = function (keys, mode) {
+    var self = this;
+    return this.vocabCards(keys, mode || "mixed").filter(function (c) { return struggle(self.vocabCard(c.key, c.dir)) > 0; })
+      .sort(function (a, b) {
+        var ea = self.vocabCard(a.key, a.dir), eb = self.vocabCard(b.key, b.dir);
+        return struggle(eb) - struggle(ea) || ea.last - eb.last;
+      });
+  };
   Store.prototype.vocabStats = function (keys, mode, now) {
     now = now || Date.now();
     var self = this, v = this.data.vocab, pool = this.vocabPool(keys);
@@ -385,7 +414,7 @@
     var known = function (dir) { return pool.filter(function (k) { var e = self.vocabCard(k, dir); return e && e.level >= VOCAB_KNOWN; }).length; };
     var week = this.data.vocabLog.filter(function (l) { return l.t > now - 7 * DAY; });
     var right = week.filter(function (l) { return l.ok; }).length;
-    return { pool: pool.length, due: due, fresh: fresh, knownEsEn: known("es-en"), knownEnEs: known("en-es"),
+    return { pool: pool.length, due: due, fresh: fresh, difficult: this.difficultCards(keys, mode).length, knownEsEn: known("es-en"), knownEnEs: known("en-es"),
              week: week.length, weekAccuracy: week.length ? Math.round(right / week.length * 100) : null };
   };
 

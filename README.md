@@ -55,6 +55,9 @@ The **Vocabulary** tab tests the words and phrases you have practised in the cou
   10 minutes, then 1, 3, 7, 21 and 60 days. Home shows how many words are due.
 - Answers are checked generously (e.g. "to stretch" = "stretch"; any meaning in "tomorrow; morning" counts).
   If the recogniser mishears you, tap **I was right**. **I don't know** shows the answer.
+- **Difficult words are remembered.** Each miss gives a word 2 "difficulty points", each right answer removes 1
+  (a right Spanish answer with pronunciation under 60 adds 1). Words with points open every new test (up to 5),
+  never wait more than a day, and are listed under **My difficult words** with a button to practise only them.
 
 ## Practice buttons
 

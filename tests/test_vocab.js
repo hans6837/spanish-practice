@@ -85,3 +85,40 @@ const s2 = new Store(mem(), { decks: [], items: [] });
 assert.strictEqual(s2.importJSON(s.exportJSON(false)), null);
 assert.strictEqual(s2.vocabCard("casa", "es-en").level, 3);
 console.log("ALL VOCAB SCHEDULE TESTS PASSED");
+
+// ---- Difficult words are remembered
+{
+  const s3 = new Store(mem(), { decks: [], items: [] });
+  const t0 = new Date(2026, 10, 13, 9).getTime(), H = 3600000;
+  ["perro", "pero", "casa"].forEach(k => s3.recordAttempt({ key: k, first: true, overall: 90 }, t0));
+  const ks = ["perro", "pero", "casa"];
+  s3.recordVocab("casa", "es-en", true, t0);
+  s3.recordVocab("perro", "es-en", false, t0);              // missed -> 2 points
+  assert.strictEqual(Store.struggle(s3.vocabCard("perro", "es-en")), 2);
+  assert.deepStrictEqual(s3.difficultCards(ks).map(c => c.key), ["perro"]);
+  // right answers on later tests: comes back within a day, not 3 days
+  s3.recordVocab("perro", "es-en", true, t0 + H);            // 1 point left
+  s3.recordVocab("perro", "es-en", true, t0 + 2 * H);        // level 2 -> normally 1 day
+  s3.recordVocab("perro", "es-en", true, t0 + DAY);          // 0 points: no longer difficult
+  assert.strictEqual(Store.struggle(s3.vocabCard("perro", "es-en")), 0);
+  assert.deepStrictEqual(s3.difficultCards(ks), []);
+  s3.recordVocab("pero", "es-en", false, t0);                // missed once
+  s3.recordVocab("pero", "es-en", true, t0 + H);
+  for (let i = 0; i < 4; i++) s3.recordVocab("pero", "es-en", i === 0 ? true : true, t0 + (i + 2) * DAY);
+  // while difficult, a right answer never waits more than a day
+  const s4 = new Store(mem(), { decks: [], items: [] });
+  s4.recordAttempt({ key: "x", first: true, overall: 90 }, t0);
+  for (let i = 0; i < 4; i++) s4.recordVocab("x", "es-en", true, t0 + i * 10 * DAY);   // level 4 -> 7 days
+  s4.recordVocab("x", "es-en", false, t0 + 50 * DAY);
+  s4.recordVocab("x", "es-en", true, t0 + 50 * DAY + 2 * 60000);
+  const cx = s4.vocabCard("x", "es-en");
+  assert.ok(cx.due - cx.last <= DAY, "difficult word comes back within a day");
+  // right word but weak pronunciation adds a point
+  s4.recordVocab("x", "en-es", true, t0, { weakPron: true });
+  assert.strictEqual(Store.struggle(s4.vocabCard("x", "en-es")), 1);
+  // cards saved before this feature: difficulty worked out from their history
+  assert.strictEqual(Store.struggle({ wrong: 2, right: 1 }), 3);
+  assert.strictEqual(Store.struggle({ wrong: 1, right: 5 }), 0);
+  assert.strictEqual(s3.vocabStats(ks, "mixed", t0).difficult, 0);
+  console.log("ALL DIFFICULT-WORD TESTS PASSED");
+}

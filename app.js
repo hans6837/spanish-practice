@@ -109,6 +109,7 @@
       (function () {
         var vs = store.vocabStats(state.courseKeys, vocabMode()), n = vs.due + vs.fresh;
         return '<div class="today-row vocab"><span>Vocabulary due</span><b>' + n + "</b></div>" +
+          (vs.difficult ? '<div class="today-row"><span>🎯 Difficult words</span><b>' + vs.difficult + "</b></div>" : "") +
           (n ? '<button class="mid primary" data-go="vocab-start">🧠 Vocabulary test (' + n + ")</button>" : '<div class="meta">' + (vs.pool ? "Vocabulary up to date. 👍" : "Practise a unit to start your vocabulary.") + "</div>");
       })();
 
@@ -551,7 +552,7 @@
   function renderVocab() {
     var st = store.vocabStats(state.courseKeys, vocabMode());
     $("vocab-mode").value = vocabMode();
-    var tiles = [[st.pool, "words in your vocabulary"], [st.due, "due now"], [st.fresh, "not tested yet"],
+    var tiles = [[st.pool, "words in your vocabulary"], [st.due, "due now"], [st.fresh, "not tested yet"], [st.difficult, "difficult words"],
                  [st.knownEsEn, "known Spanish → English"], [st.knownEnEs, "known English → Spanish"],
                  [st.weekAccuracy == null ? "–" : st.weekAccuracy + "%", "right in the last 7 days"]];
     $("vocab-tiles").innerHTML = tiles.map(function (t) { return '<div class="tile"><div class="v">' + t[0] + '</div><div class="l">' + t[1] + "</div></div>"; }).join("");
@@ -560,16 +561,28 @@
     $("vocab-empty").classList.toggle("hidden", !empty);
     $("btn-start-quiz").classList.toggle("hidden", empty);
     $("btn-start-quiz").textContent = st.due + st.fresh ? "🧠 Start vocabulary test (" + (st.due + st.fresh) + ")" : "🧠 Extra vocabulary practice";
-    var v = store.data.vocab, weak = Object.keys(v).filter(function (id) { return v[id].wrong > 0 && state.byKey[id.split("|")[1]]; })
-      .sort(function (a, b) { return (v[b].wrong - v[b].right) - (v[a].wrong - v[a].right) || v[a].level - v[b].level; }).slice(0, 8);
-    $("vocab-weak").innerHTML = weak.length ? weak.map(function (id) {
-      var dir = id.split("|")[0], it = state.byKey[id.split("|")[1]].item;
-      return '<div class="list-row"><span><b>' + esc(it.es) + '</b> <span class="meta">' + esc(it.en) + " · " + (dir === "es-en" ? "Spanish → English" : "English → Spanish") +
-        '</span></span><span class="row-end"><span class="pill bad">' + v[id].wrong + " wrong</span> <span class=\"pill good\">" + v[id].right + " right</span></span></div>";
-    }).join("") : '<div class="empty">No difficult words yet.</div>';
+    var hard = store.difficultCards(state.courseKeys, vocabMode());
+    $("btn-difficult").classList.toggle("hidden", !hard.length);
+    $("btn-difficult").textContent = "🎯 Practise my difficult words (" + hard.length + ")";
+    $("vocab-weak").innerHTML = hard.length ? hard.map(function (c) {
+      var e = store.vocabCard(c.key, c.dir), it = state.byKey[c.key].item, pts = PracticeStore.struggle(e);
+      return '<div class="list-row"><span><b>' + esc(it.es) + '</b> <span class="meta">' + esc(it.en) + " · " + (c.dir === "es-en" ? "Spanish → English" : "English → Spanish") +
+        '</span></span><span class="row-end"><span class="pill ' + (pts >= 4 ? "bad" : "ok") + '">' + pts + " point" + (pts === 1 ? "" : "s") + "</span> " +
+        '<span class="meta">' + e.wrong + " wrong · " + e.right + " right</span></span></div>";
+    }).join("") + '<p class="hint">Each miss adds 2 points, each right answer removes 1. At 0 points a word leaves this list. Difficult words open every test and never wait more than a day.</p>'
+      : '<div class="empty">No difficult words right now. 👍</div>';
   }
-  function startQuiz() {
-    state.quiz = { mode: vocabMode(), count: 0, right: 0, limit: 20, recent: [], extra: false, retry: [] };
+  // Difficult words open every test (up to 5; not ones answered in the last 30 minutes).
+  function difficultQueue(all) {
+    var now = Date.now();
+    return store.difficultCards(state.courseKeys, vocabMode()).filter(function (c) {
+      return all || now - store.vocabCard(c.key, c.dir).last > 30 * 60000;
+    }).map(function (c) { return c.dir + "|" + c.key; });
+  }
+  function startQuiz(onlyDifficult) {
+    var hard = difficultQueue(onlyDifficult);
+    state.quiz = { mode: vocabMode(), count: 0, right: 0, limit: onlyDifficult ? hard.length : 20, recent: [], extra: false, retry: [],
+                   hard: onlyDifficult ? hard : hard.slice(0, 5), onlyDifficult: !!onlyDifficult };
     showView("quiz");
     nextCard();
   }
@@ -577,7 +590,12 @@
     var q = state.quiz;
     Speech.stopPlayback();
     $("quiz-end").classList.add("hidden"); $("quiz-main").classList.remove("hidden");
-    var r = store.chooseVocab(state.courseKeys, q.mode, { exclude: q.recent });
+    var r = { card: null, why: "done" };
+    while (q.hard.length) {
+      var h = q.hard.shift().split("|");
+      if (store.vocabCard(h[1], h[0])) { r = { card: { dir: h[0], key: h[1] }, why: "difficult" }; break; }
+    }
+    if (!r.card && !q.onlyDifficult) r = store.chooseVocab(state.courseKeys, q.mode, { exclude: q.recent });
     if (!r.card && q.extra) {
       // extra practice: the cards seen longest ago
       var cards = store.vocabCards(state.courseKeys, q.mode).filter(function (c) { return q.recent.indexOf(c.dir + "|" + c.key) < 0; });
@@ -593,7 +611,7 @@
     var c = r.card, entry = state.byKey[c.key], it = entry.item;
     q.card = c; q.entry = entry; q.answered = false; q.why = r.why;
     q.recent = q.recent.filter(function (x) { return x !== c.dir + "|" + c.key; }).concat([c.dir + "|" + c.key]).slice(-4);
-    $("quiz-why").textContent = ({ review: "Review", "new": "New word", extra: "Extra practice", again: "Once more (you missed it)" })[r.why] + " · " + (c.dir === "es-en" ? "Spanish → English" : "English → Spanish");
+    $("quiz-why").textContent = ({ review: "Review", "new": "New word", extra: "Extra practice", again: "Once more (you missed it)", difficult: "🎯 Difficult word" })[r.why] + " · " + (c.dir === "es-en" ? "Spanish → English" : "English → Spanish");
     $("quiz-session").textContent = (q.count + 1) + " / " + q.limit + " · " + q.right + " right";
     $("quiz-result").classList.add("hidden");
     $("quiz-answer").disabled = false; $("quiz-dunno").disabled = false;
@@ -649,7 +667,10 @@
     var q = state.quiz, c = q.card, it = q.entry.item;
     q.answered = true; q.count++; if (ok) q.right++;
     q.before = store.vocabCard(c.key, c.dir) ? JSON.parse(JSON.stringify(store.vocabCard(c.key, c.dir))) : null;
-    var saved = store.recordVocab(c.key, c.dir, ok);
+    var weakPron = !!(ok && pron && pron.overall < 60);
+    var wasDifficult = PracticeStore.struggle(store.vocabCard(c.key, c.dir)) > 0;
+    var saved = store.recordVocab(c.key, c.dir, ok, Date.now(), { weakPron: weakPron });
+    var nowDifficult = PracticeStore.struggle(saved.card) > 0;
     var cid = c.dir + "|" + c.key;
     q.retry = q.retry.filter(function (x) { return x !== cid; });
     if (!ok) q.retry.push(cid);
@@ -662,8 +683,13 @@
       (it.fr ? ' &nbsp; <span class="flag">FR</span> ' + esc(it.fr) : "") + "</div>";
     if (pron) html += '<div class="heard">Pronunciation: <b class="num ' + colour(pron.overall) + '">' + pron.overall + "</b> " +
       pron.words.map(function (w) { return '<span class="pill ' + w.colour + '">' + esc(w.text) + " " + w.score + "</span>"; }).join(" ") + "</div>";
-    var nextGap = ok ? (saved.card.level <= 1 ? "in about 10 minutes" : "in " + Math.round(Store_gapDays(saved.card)) + " day(s)") : "in about a minute";
+    if (weakPron) html += '<div class="tip">Right word, but the pronunciation needs work (' + pron.overall + "). It will come back sooner.</div>";
+    var gapMin = (saved.card.due - saved.card.last) / 60000;
+    var nextGap = gapMin < 5 ? "in about a minute" : gapMin < 120 ? "in about " + Math.round(gapMin) + " minutes" : "in " + Math.round(Store_gapDays(saved.card)) + " day(s)";
     html += '<div class="meta">This word comes back ' + nextGap + ".</div>";
+    if (nowDifficult && !wasDifficult) html += '<div class="tip">🎯 Added to your difficult words: it will open your next tests until you get it right a few times.</div>';
+    else if (nowDifficult) html += '<div class="meta">🎯 Still on your difficult list (' + PracticeStore.struggle(saved.card) + " point" + (PracticeStore.struggle(saved.card) === 1 ? "" : "s") + " left).</div>";
+    else if (wasDifficult) html += '<div class="tip">🎉 No longer a difficult word!</div>';
     html += '<div class="quiz-actions"><button class="big next" id="quiz-next">Next ➡</button>' +
       (!ok && heard ? '<button class="mid" id="quiz-override">I was right (it misheard me)</button>' : "") +
       '<button class="mid" id="quiz-replay">🔊 Hear the Spanish</button></div>';
@@ -676,7 +702,8 @@
   function Store_gapDays(card) { return Math.max(1, (card.due - card.last) / 86400000); }
   function endQuiz(nothingLeft) {
     var q = state.quiz;
-    var html = "<h3>" + (nothingLeft ? "All vocabulary done for now ✅" : "Test finished ✅") + "</h3>" +
+    if (q.onlyDifficult) nothingLeft = false;
+    var html = "<h3>" + (q.onlyDifficult ? "Difficult words done ✅" : nothingLeft ? "All vocabulary done for now ✅" : "Test finished ✅") + "</h3>" +
       "<p><b>" + q.right + " of " + q.count + "</b> right.</p>" +
       (nothingLeft ? "<p>Nothing else is due. Words come back on their own schedule; practise more course items to add new words.</p>" : "") +
       '<div class="row"><button class="mid primary" id="quiz-more">' + (nothingLeft ? "Extra practice anyway" : "20 more") + '</button><button class="mid" data-go="home">Home</button></div>';
@@ -716,6 +743,7 @@
   $("btn-next").addEventListener("click", function () { if (!state.recording) nextInSession(); });
   $("btn-reveal").addEventListener("click", function () { reveal(true); });
   $("btn-start-quiz").addEventListener("click", function () { Speech.audio(); startQuiz(); });
+  $("btn-difficult").addEventListener("click", function () { Speech.audio(); startQuiz(true); });
   $("vocab-mode").addEventListener("change", function (e) { store.data.settings.vocabMode = e.target.value; store.save(); renderVocab(); });
   $("quiz-hear").addEventListener("click", function () { if (!state.recording) playPrompt(); });
   $("quiz-answer").addEventListener("click", quizAnswer);
@@ -742,7 +770,12 @@
     }
     if (t.id === "quiz-next") { nextCard(); return; }
     if (t.id === "quiz-replay") { Speech.speak(state.quiz.entry.item.es, false).catch(function () {}); return; }
-    if (t.id === "quiz-more") { state.quiz.count = 0; state.quiz.right = 0; state.quiz.extra = true; nextCard(); return; }
+    if (t.id === "quiz-more") {
+      var qm = state.quiz;
+      qm.count = 0; qm.right = 0; qm.limit = 20;
+      if (qm.onlyDifficult) qm.onlyDifficult = false; else qm.extra = true;
+      nextCard(); return;
+    }
     if (t.id === "quiz-override") {
       var q = state.quiz;
       store.correctLastVocab(q.card.key, q.card.dir, q.before);
