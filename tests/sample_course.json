@@ -1,0 +1,154 @@
+{
+ "title": "Sample course (for testing only)",
+ "levels": [
+  {
+   "title": "Nivel 1 – Los sonidos",
+   "subtitle": "Sounds",
+   "units": [
+    {
+     "title": "Las cinco vocales",
+     "lesson": "Spanish has only five vowels: a, e, i, o, u. They are short and pure, never glided.\n\nKeep your mouth still while you say each vowel.",
+     "examples": [
+      {
+       "spanish": "a, e, i, o, u",
+       "english": "a, e, i, o, u",
+       "french": "a, é, i, o, ou",
+       "tip": "A - E - I - O - U"
+      },
+      {
+       "spanish": "mamá",
+       "english": "mum",
+       "french": "maman",
+       "tip": "ma-MA"
+      }
+     ],
+     "items": [
+      {
+       "spanish": "casa",
+       "english": "house",
+       "french": "maison",
+       "tip": "KA-sa"
+      },
+      {
+       "spanish": "mesa",
+       "english": "table",
+       "french": "table",
+       "tip": "ME-sa"
+      },
+      {
+       "spanish": "piso",
+       "english": "floor",
+       "french": "étage",
+       "tip": "PI-so"
+      },
+      {
+       "spanish": "todo",
+       "english": "everything",
+       "french": "tout",
+       "tip": "TO-do"
+      },
+      {
+       "spanish": "luna",
+       "english": "moon",
+       "french": "lune",
+       "tip": "LU-na"
+      }
+     ]
+    },
+    {
+     "title": "La r y la rr",
+     "lesson": "The single r is a quick tap; the double rr is rolled.",
+     "examples": [
+      {
+       "spanish": "pero / perro",
+       "english": "but / dog",
+       "french": "mais / chien",
+       "tip": "PE-ro / PE-rro"
+      }
+     ],
+     "items": [
+      {
+       "spanish": "perro",
+       "english": "dog",
+       "french": "chien",
+       "tip": "PE-rro"
+      },
+      {
+       "spanish": "pero",
+       "english": "but",
+       "french": "mais",
+       "tip": "PE-ro"
+      },
+      {
+       "spanish": "la rodilla",
+       "english": "the knee",
+       "french": "le genou",
+       "tip": "la ro-DI-lla"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Nivel 2 – A1",
+   "units": [
+    {
+     "title": "Saludos",
+     "lesson": "Basic greetings.",
+     "examples": [
+      {
+       "spanish": "¡Hola!",
+       "english": "Hello!",
+       "french": "Bonjour !",
+       "tip": "O-la"
+      }
+     ],
+     "items": [
+      {
+       "spanish": "Hola",
+       "english": "Hello",
+       "french": "Bonjour",
+       "tip": "O-la"
+      },
+      {
+       "spanish": "Buenos días",
+       "english": "Good morning",
+       "french": "Bonjour",
+       "tip": "BUE-nos DI-as"
+      },
+      {
+       "spanish": "Gracias",
+       "english": "Thank you",
+       "french": "Merci",
+       "tip": "GRA-thias"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Nivel 6 – C1: Fisioterapia",
+   "units": [
+    {
+     "title": "En la consulta",
+     "lesson": "Clinical phrases.",
+     "examples": [],
+     "items": [
+      {
+       "spanish": "¿Dónde le duele?",
+       "english": "Where does it hurt?",
+       "french": "Où avez-vous mal ?",
+       "tip": "DON-de le DUE-le"
+      },
+      {
+       "spanish": "Doble la rodilla",
+       "english": "Bend your knee",
+       "french": "Pliez le genou",
+       "tip": "DO-ble la ro-DI-lla"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

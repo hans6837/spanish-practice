@@ -16,12 +16,12 @@
 </head>
 <body>
 <header class="topbar">
-  <div class="brand">🇪🇸 Spanish Pronunciation</div>
+  <div class="brand">🇪🇸 Spanish Course</div>
   <nav class="tabs">
-    <button class="tab active" data-view="practice">Practise</button>
+    <button class="tab active" data-view="home">Home</button>
     <button class="tab" data-view="progress">Progress</button>
     <button class="tab" data-view="words">My words</button>
-    <button class="tab" data-view="setup">Setup</button>
+    <button class="tab" data-view="setup">Settings</button>
   </nav>
 </header>
 
@@ -30,43 +30,83 @@
     <span>📲 Tip: tap <b>Share</b> → <b>Add to Home Screen</b> and open the program from that icon. This keeps your results safe.</span>
     <button id="home-hint-close" class="small-btn" aria-label="Close tip">OK</button>
   </div>
+  <div id="course-problem" class="banner warn hidden"></div>
+
+  <!-- ======================= HOME ======================= -->
+  <section id="view-home" class="view active">
+    <div class="home-top">
+      <div class="next-card" id="next-card"></div>
+      <div class="today-card" id="today-card"></div>
+    </div>
+    <div class="panel" id="weak-sounds-panel">
+      <h3>My weakest sounds</h3>
+      <div id="weak-sounds"></div>
+    </div>
+    <div id="levels"></div>
+  </section>
+
+  <!-- ======================= UNIT (lesson) ======================= -->
+  <section id="view-unit" class="view">
+    <button class="back" data-go="home">← Home</button>
+    <div class="unit-head">
+      <div class="eyebrow" id="unit-level"></div>
+      <h2 id="unit-title"></h2>
+      <div class="unit-progress" id="unit-progress"></div>
+    </div>
+    <div class="panel lesson" id="unit-lesson"></div>
+    <div class="panel" id="unit-examples-panel">
+      <h3>Example phrases</h3>
+      <div id="unit-examples"></div>
+    </div>
+    <button id="btn-start-practice" class="big next wide">🎤 Practice</button>
+    <details class="panel" id="unit-items-panel">
+      <summary><b>Items in this unit</b> <span class="meta" id="unit-items-count"></span></summary>
+      <div id="unit-items"></div>
+    </details>
+  </section>
 
   <!-- ======================= PRACTICE ======================= -->
-  <section id="view-practice" class="view active">
-    <div class="row deckrow">
-      <label for="deck">Deck</label>
-      <select id="deck"></select>
-      <span id="why" class="badge"></span>
+  <section id="view-practice" class="view">
+    <div class="row between">
+      <button class="back" id="practice-back">← Unit</button>
+      <span class="meta" id="practice-session"></span>
     </div>
-
-    <div class="card">
-      <div class="es" id="es">…</div>
-      <div class="tr"><span class="flag">EN</span> <span id="en"></span></div>
-      <div class="tr"><span class="flag">FR</span> <span id="fr"></span></div>
-    </div>
-
-    <div class="buttons">
-      <button id="btn-listen" class="big listen">🔊 Listen</button>
-      <button id="btn-slow" class="big slow">🐢 Slower</button>
-      <button id="btn-record" class="big record">🎤 Record</button>
-      <button id="btn-me" class="big me" disabled>👂 Hear myself</button>
-      <button id="btn-next" class="big next">Next ➡</button>
-    </div>
-    <div id="rec-level" class="meter hidden"><div id="rec-level-bar"></div></div>
-    <div id="status" class="status" aria-live="polite"></div>
-
-    <div id="result" class="result hidden">
-      <div class="scores">
-        <div class="score main"><div class="num" id="s-overall">0</div><div class="lbl">Overall</div></div>
-        <div class="score"><div class="num" id="s-accuracy">0</div><div class="lbl">Accuracy</div></div>
-        <div class="score"><div class="num" id="s-fluency">0</div><div class="lbl">Fluency</div></div>
-        <div class="score"><div class="num" id="s-complete">0</div><div class="lbl">Completeness</div></div>
+    <div id="practice-main">
+      <div class="row deckrow">
+        <span id="why" class="badge"></span>
       </div>
-      <div class="words" id="words"></div>
-      <div class="legend"><span class="dot good"></span> good (80+) <span class="dot ok"></span> almost (60–79) <span class="dot bad"></span> needs work (under 60) · tap a word to see each sound</div>
-      <div id="tips" class="tips"></div>
-      <div id="attempts" class="attempts"></div>
+      <div class="card">
+        <div class="es" id="es">…</div>
+        <div class="tr"><span class="flag">EN</span> <span id="en"></span></div>
+        <div class="tr reveal hidden" id="fr-line"><span class="flag">FR</span> <span id="fr"></span></div>
+        <div class="tip-line reveal hidden" id="tip-line"><span class="flag">SAY</span> <span id="tip"></span></div>
+        <button class="linkish" id="btn-reveal">Show tip &amp; French</button>
+      </div>
+
+      <div class="buttons">
+        <button id="btn-listen" class="big listen">🔊 Listen</button>
+        <button id="btn-slow" class="big slow">🐢 Slower</button>
+        <button id="btn-record" class="big record">🎤 Record</button>
+        <button id="btn-me" class="big me" disabled>👂 Hear myself</button>
+        <button id="btn-next" class="big next">Next ➡</button>
+      </div>
+      <div id="rec-level" class="meter hidden"><div id="rec-level-bar"></div></div>
+      <div id="status" class="status" aria-live="polite"></div>
+
+      <div id="result" class="result hidden">
+        <div class="scores">
+          <div class="score main"><div class="num" id="s-overall">0</div><div class="lbl">Overall</div></div>
+          <div class="score"><div class="num" id="s-accuracy">0</div><div class="lbl">Accuracy</div></div>
+          <div class="score"><div class="num" id="s-fluency">0</div><div class="lbl">Fluency</div></div>
+          <div class="score"><div class="num" id="s-complete">0</div><div class="lbl">Completeness</div></div>
+        </div>
+        <div class="words" id="words"></div>
+        <div class="legend"><span class="dot good"></span> good (80+) <span class="dot ok"></span> almost (60–79) <span class="dot bad"></span> needs work (under 60) · tap a word to see each sound</div>
+        <div id="tips" class="tips"></div>
+        <div id="attempts" class="attempts"></div>
+      </div>
     </div>
+    <div id="practice-end" class="panel hidden"></div>
   </section>
 
   <!-- ======================= PROGRESS ======================= -->
@@ -97,11 +137,12 @@
   <!-- ======================= MY WORDS ======================= -->
   <section id="view-words" class="view">
     <h2>Add your own word or sentence</h2>
+    <p class="hint">Your own words appear on the Home screen under “My words”, grouped by the name you give them.</p>
     <form id="add-form" class="add-form">
       <label>Spanish <input id="add-es" required autocapitalize="off" placeholder="e.g. Gire la cabeza a la derecha"></label>
       <label>English <input id="add-en" placeholder="e.g. Turn your head to the right"></label>
       <label>French <input id="add-fr" placeholder="e.g. Tournez la tête à droite"></label>
-      <label>Deck <input id="add-deck" list="deck-names" value="My words"></label>
+      <label>Group <input id="add-deck" list="deck-names" value="My words"></label>
       <datalist id="deck-names"></datalist>
       <div class="row">
         <button type="button" id="add-listen" class="mid">🔊 Hear it</button>
@@ -109,30 +150,40 @@
         <span id="add-msg" class="status"></span>
       </div>
     </form>
-    <h2>All words and sentences</h2>
+    <h2>My words and sentences</h2>
     <div id="all-items"></div>
   </section>
 
-  <!-- ======================= SETUP ======================= -->
+  <!-- ======================= SETTINGS ======================= -->
   <section id="view-setup" class="view">
-    <h2>Setup</h2>
-    <p>Do these steps in order. Each one turns green when it works.</p>
+    <h2>Settings</h2>
+    <div class="panel">
+      <h3>Course</h3>
+      <form id="course-form" class="key-form">
+        <label>Accent <select id="accent-input">
+          <option value="es-ES">Spain (es-ES)</option>
+          <option value="es-MX">Mexico (es-MX)</option>
+        </select></label>
+        <label>Voice <select id="voice-input"></select></label>
+        <label>Speed <select id="speed-input">
+          <option value="0%">Normal</option>
+          <option value="-15%">Slightly slow</option>
+          <option value="-25%">Slow</option>
+        </select></label>
+        <label>New items per day <input id="newperday-input" type="number" min="1" max="100" inputmode="numeric"></label>
+        <button type="submit" class="mid primary">Save</button>
+      </form>
+      <div class="hint">The accent is used for the model voice and for scoring your pronunciation.</div>
+      <div id="course-msg" class="status"></div>
+      <div id="course-info" class="hint"></div>
+    </div>
+    <h3>Setup check</h3>
     <ol class="checks">
       <li id="chk-settings"><div class="chk-head"><span class="mark">…</span> <b>1. Azure key and region</b></div><div class="chk-body"></div>
         <form id="key-form" class="key-form">
           <label class="wide">KEY 1 <input id="key-input" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste KEY 1 from the Azure portal"></label>
           <label>Region <input id="region-input" list="regions" autocapitalize="off" spellcheck="false" placeholder="e.g. westeurope"></label>
           <datalist id="regions"><option value="westeurope"><option value="northeurope"><option value="francecentral"><option value="swedencentral"><option value="uksouth"><option value="eastus"><option value="westus2"></datalist>
-          <label>Voice <select id="voice-input">
-            <option value="es-ES-ElviraNeural">Elvira (woman)</option>
-            <option value="es-ES-AlvaroNeural">Álvaro (man)</option>
-            <option value="es-ES-XimenaNeural">Ximena (woman)</option>
-          </select></label>
-          <label>Speed <select id="speed-input">
-            <option value="0%">Normal</option>
-            <option value="-15%">Slightly slow</option>
-            <option value="-25%">Slow</option>
-          </select></label>
           <button type="submit" class="mid primary">Save</button>
         </form>
         <div class="hint">Your key is stored only on this iPad, never in the program's code.</div></li>
@@ -147,8 +198,10 @@
 
 <script src="vendor/speech-sdk.min.js"></script>
 <script src="decks.js"></script>
+<script src="course.js"></script>
 <script src="sounds.js"></script>
 <script src="store.js"></script>
+<script src="speech.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -54,5 +54,21 @@ const fake3 = { NBest: [{ PronunciationAssessment: { PronScore: 60 }, Words: [
   { Word: "perro", PronunciationAssessment: { AccuracyScore: 55, ErrorType: "Mispronunciation" }, Phonemes: [P("p",95),P("e",95),P("r",30),P("r",35),P("o",95)] } ] }] };
 const r3 = S.analyse("perro", fake3);
 assert.strictEqual(r3.words[0].problems[0].key, "rr");
+// French comparisons and French-speaker traps
+assert.ok(/throat like the French/.test(r.words[2].problems[0].french));
+const fakeNasal = { NBest: [{ PronunciationAssessment: { PronScore: 55 }, Words: [
+  { Word: "con", PronunciationAssessment: { AccuracyScore: 50, ErrorType: "Mispronunciation" }, Phonemes: [P("k",95),P("o",30),P("n",90)] },
+  { Word: "mesa", PronunciationAssessment: { AccuracyScore: 60, ErrorType: "Mispronunciation" }, Phonemes: [P("m",95),P("e",95),P("s",95),P("a",30)] },
+  { Word: "grande", PronunciationAssessment: { AccuracyScore: 55, ErrorType: "Mispronunciation" }, Phonemes: [P("g",95),P("r",95),P("a",95),P("n",95),P("d",95),P("e",20)] } ] }] };
+const rn = S.analyse("con mesa grande", fakeNasal);
+assert.ok(/nasal/.test(rn.words[0].problems[0].french), "nasal warning on 'con'");
+assert.ok(/French 'é'/.test(rn.words[1].problems[0].french) || rn.words[1].problems[0].key === "a");
+assert.ok(/silent/.test(rn.words[2].problems[0].french), "final e warning on 'grande'");
+// Mexico accent: z / ce / ci are an s
+S.setAccent("es-MX");
+assert.strictEqual(show("Cinco zapatos"), "cinco=c:zs i:i n:other c:ptk o:o | zapatos=z:zs a:a p:ptk a:a t:ptk o:o s:s");
+assert.ok(/house/.test(S.soundInfo("j").tip));
+S.setAccent("es-ES");
+assert.ok(/Bach/.test(S.soundInfo("j").tip));
 console.log(fail ? fail + " FAILED" : "ALL SOUND TESTS PASSED");
 process.exit(fail ? 1 : 0);

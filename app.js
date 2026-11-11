@@ -1,17 +1,22 @@
-/* Spanish Pronunciation Practice - page logic (runs entirely in the browser) */
+/* Spanish Course - page logic (runs entirely in the browser) */
 (function () {
   "use strict";
-  var SDK = window.SpeechSDK;
   var store = new PracticeStore(window.localStorage, window.BUILTIN_DECKS);
+  Speech.init(store);
+  SpanishSounds.setAccent(store.settings().accent);
+
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]; }); };
   var colour = function (s) { return SpanishSounds.colourFor(s); };
+  var each = function (sel, fn, root) { Array.prototype.forEach.call((root || document).querySelectorAll(sel), fn); };
   var SOUND_LABELS = {};
   Object.keys(SpanishSounds.SOUNDS).forEach(function (k) { SOUND_LABELS[k] = SpanishSounds.SOUNDS[k].label; });
 
-  var state = { item: null, why: "", deck: "All", recent: [], shown: [], attemptsThisItem: [],
-                recording: null, lastRecording: null, audioCache: {} };
-  try { state.deck = localStorage.getItem("spanishPractice.deck") || "All"; } catch (e) {}
+  var state = {
+    course: null, levels: [], units: {}, byKey: {}, courseKeys: [],
+    unit: null, session: null, entry: null, why: "",
+    recent: [], shown: [], attemptsThisItem: [], recording: null, lastRecording: null,
+  };
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
 
   function setStatus(msg, isError) {
@@ -23,356 +28,268 @@
   function isTouchApple() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   }
-
-  // ------------------------------------------------------------ audio engine
-  // iPads only allow sound that starts from a tap, so every button first
-  // "unlocks" one shared AudioContext, and all sound goes through it.
-  var AC = null, currentSource = null;
-  // On iPads, web audio is silenced by Silent Mode (even at full volume).
-  // Ask for the "play-and-record" audio session once, when the app opens
-  // (Safari 16.4+): it plays in Silent Mode AND allows the microphone
-  // ("playback" alone blocks recording). Changing it later, while sound is
-  // starting, can pause the audio. Older iPads: play a short silent <audio>
-  // clip inside the first tap.
-  try { if (navigator.audioSession) navigator.audioSession.type = "play-and-record"; } catch (e) {}
-  function silentWavUrl() {
-    var n = 2205, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
-    function str(o, t) { for (var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
-    str(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); str(8, "WAVE"); str(12, "fmt ");
-    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-    v.setUint32(24, 22050, true); v.setUint32(28, 44100, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-    str(36, "data"); v.setUint32(40, n * 2, true);
-    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
-  }
-  var mediaUnlocked = !!navigator.audioSession;
-  function unlockMediaPlayback() {
-    if (mediaUnlocked) return;
-    mediaUnlocked = true;
-    try {
-      var el = new Audio(silentWavUrl());
-      el.setAttribute("playsinline", "");
-      var p = el.play(); if (p && p.catch) p.catch(function () {});
-    } catch (e) {}
-  }
-  function audio() {
-    unlockMediaPlayback();
-    mediaPlayer();
-    if (!AC) {
-      AC = new (window.AudioContext || window.webkitAudioContext)();
-      var b = AC.createBuffer(1, 1, 22050), s = AC.createBufferSource(); // silent unlock
-      s.buffer = b; s.connect(AC.destination); s.start(0);
-    }
-    if (AC.state !== "running") { try { AC.resume(); } catch (e) {} }
-    return AC;
-  }
-  // Speech and recordings play through one shared <audio> element (like a
-  // video), not through web audio: on iPads web audio can go silent after the
-  // microphone has been used, or in Silent Mode. The element is "unlocked"
-  // with a silent clip inside the first tap, so later plays are allowed.
-  var player = null, playerUnlocked = false, playerUrl = null, playerDone = null;
-  function mediaPlayer() {
-    if (!player) {
-      player = document.createElement("audio");
-      player.setAttribute("playsinline", ""); player.preload = "auto";
-      document.body.appendChild(player);
-    }
-    if (!playerUnlocked) {
-      playerUnlocked = true;
-      try {
-        player.src = silentWavUrl();
-        var p = player.play();
-        if (p && p.catch) p.catch(function () { playerUnlocked = false; });
-      } catch (e) { playerUnlocked = false; }
-    }
-    return player;
-  }
-  function stopPlayback() {
-    if (player) { try { player.pause(); } catch (e) {} }
-    if (playerDone) { var d = playerDone; playerDone = null; d(); }
-  }
-  // data: ArrayBuffer of MP3 (Azure voice) or WAV (your recording)
-  function playAudioData(data, mime) {
-    var el = mediaPlayer();
-    stopPlayback();
-    if (playerUrl) { URL.revokeObjectURL(playerUrl); playerUrl = null; }
-    playerUrl = URL.createObjectURL(new Blob([data], { type: mime }));
-    return new Promise(function (resolve, reject) {
-      var done = false;
-      function finish() { if (done) return; done = true; el.onended = el.onerror = null; if (playerDone === finish) playerDone = null; resolve(); }
-      playerDone = finish;
-      el.onended = finish;
-      el.onerror = function () { finish(); };
-      el.src = playerUrl;
-      el.volume = 1;
-      var p = el.play();
-      if (p && p.catch) p.catch(function (e) {
-        done = true; playerDone = null;
-        var err = new Error("The iPad blocked the sound. Tap the button again.");
-        err.help = String(e && e.message || e); reject(err);
-      });
-      setTimeout(finish, 30000); // never wait forever
-    });
-  }
-  function decode(arrayBuffer) {
-    var ctx = audio();
-    return new Promise(function (resolve, reject) { ctx.decodeAudioData(arrayBuffer.slice(0), resolve, function (e) { reject(e || new Error("Could not decode audio")); }); });
-  }
-
-  // ------------------------------------------------------------ Azure
-  function speechConfig() {
-    var s = store.settings();
-    if (!store.isConfigured()) {
-      var e = new Error("Azure is not set up yet."); e.help = "Open the Setup tab and paste your key and region."; throw e;
-    }
-    var cfg = SDK.SpeechConfig.fromSubscription(s.key, s.region);
-    cfg.speechRecognitionLanguage = "es-ES";
-    return cfg;
-  }
-  function friendly(details) {
-    var d = String(details || "");
-    if (/401|403|auth|subscription|key/i.test(d)) return "Azure refused the key. Check KEY 1 and the region on the Setup tab. (" + d + ")";
-    if (/quota|429|throttl/i.test(d)) return "The free Azure allowance is used up for now (free tier limit). Try again later. (" + d + ")";
-    if (/1006|websocket|network|connect/i.test(d)) return "Could not connect to Azure. Check the Wi-Fi and that the region is correct. (" + d + ")";
-    if (/internal (server )?error/i.test(d)) return "Azure had a temporary problem scoring this recording. (" + d + ")";
-    return "Azure problem: " + d;
-  }
-
-  // Listen: Azure's Spain voice. The audio is kept in memory so replays are free.
-  function speak(text, slow) {
-    var ctx = audio();
-    var s = store.settings(), rate = slow ? "-40%" : (s.speed || "-15%"), voice = s.voice || "es-ES-ElviraNeural";
-    var cacheKey = voice + "|" + rate + "|" + text;
-    if (state.audioCache[cacheKey]) return playAudioData(state.audioCache[cacheKey], "audio/mpeg");
-    return new Promise(function (resolve, reject) {
-      var cfg;
-      try { cfg = speechConfig(); } catch (e) { return reject(e); }
-      cfg.speechSynthesisOutputFormat = SDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
-      var synth = new SDK.SpeechSynthesizer(cfg, null);
-      var ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="es-ES">' +
-        '<voice name="' + esc(voice) + '"><prosody rate="' + esc(rate) + '">' + esc(text) + "</prosody></voice></speak>";
-      synth.speakSsmlAsync(ssml, function (result) {
-        synth.close();
-        if (result.reason === SDK.ResultReason.SynthesizingAudioCompleted) resolve(result.audioData);
-        else reject(new Error(friendly(result.errorDetails)));
-      }, function (err) { synth.close(); reject(new Error(friendly(err))); });
-    }).then(function (mp3) {
-      state.audioCache[cacheKey] = mp3;
-      return playAudioData(mp3, "audio/mpeg");
-    });
-  }
-  function speakFallback(text, slow) {
-    if (!window.speechSynthesis) return false;
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = "es-ES"; u.rate = slow ? 0.6 : 0.85;
-    var v = speechSynthesis.getVoices().filter(function (v) { return v.lang === "es-ES"; })[0];
-    if (v) u.voice = v;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
-    return true;
-  }
-
-  // ------------------------------------------------------------ recording + assessment
-  // One microphone stream feeds Azure (16 kHz) and keeps a copy for "Hear myself".
-  function wavFromChunks(chunks, rate) {
-    var len = chunks.reduce(function (n, c) { return n + c.length; }, 0);
-    var buf = new ArrayBuffer(44 + len * 2), v = new DataView(buf), o = 0;
-    function str(s) { for (var i = 0; i < s.length; i++) v.setUint8(o++, s.charCodeAt(i)); }
-    str("RIFF"); v.setUint32(o, 36 + len * 2, true); o += 4; str("WAVEfmt ");
-    v.setUint32(o, 16, true); o += 4; v.setUint16(o, 1, true); o += 2; v.setUint16(o, 1, true); o += 2;
-    v.setUint32(o, rate, true); o += 4; v.setUint32(o, rate * 2, true); o += 4; v.setUint16(o, 2, true); o += 2; v.setUint16(o, 16, true); o += 2;
-    str("data"); v.setUint32(o, len * 2, true); o += 4;
-    chunks.forEach(function (c) { for (var i = 0; i < c.length; i++, o += 2) v.setInt16(o, c[i], true); });
-    return buf;
-  }
-
-  // Scoring settings, from most detailed to simplest. The level that works
-  // with this Azure resource is remembered on the iPad.
-  var SCORING_LEVELS = [
-    { granularity: "Phoneme", miscue: true },
-    { granularity: "Phoneme", miscue: false },
-    { granularity: "Word", miscue: false },
-    { granularity: "FullText", miscue: false }
-  ];
-  function scoringLevel() {
-    var n = parseInt(localStorage.getItem("scoringLevel") || "0", 10);
-    return n >= 0 && n < SCORING_LEVELS.length ? n : 0;
-  }
-  function rememberScoringLevel(n) { try { localStorage.setItem("scoringLevel", String(n)); } catch (e) {} }
-  function scoringConfig(referenceText, level) {
-    var l = SCORING_LEVELS[level];
-    return new SDK.PronunciationAssessmentConfig(referenceText,
-      SDK.PronunciationAssessmentGradingSystem.HundredMark, SDK.PronunciationAssessmentGranularity[l.granularity], l.miscue);
-  }
-
-  /*
-   * Record and score. Returns a controller {promise, stop()}.
-   * onLevel(0..1) is called while listening, onListening() once the mic is on.
-   */
-  function assess(referenceText, onListening, onLevel) {
-    var ctx = audio(); // must run inside the tap
-    var stopped = false, cleanup = function () {}, pushStream = null;
-    var ctl = { stop: function () { if (!stopped) { stopped = true; if (pushStream) pushStream.close(); } } };
-    ctl.promise = new Promise(function (resolve, reject) {
-      var cfg;
-      try { cfg = speechConfig(); } catch (e) { return reject(e); }
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return reject(new Error("This browser can't use the microphone here. Please use Safari."));
-      }
-      navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then(function (stream) {
-        var RATE = 16000, ratio = ctx.sampleRate / RATE, carry = 0, chunks = [];
-        pushStream = SDK.AudioInputStream.createPushStream(SDK.AudioStreamFormat.getWaveFormatPCM(RATE, 16, 1));
-        var source = ctx.createMediaStreamSource(stream);
-        var proc = ctx.createScriptProcessor(4096, 1, 1);
-        var mute = ctx.createGain(); mute.gain.value = 0;
-        proc.onaudioprocess = function (e) {
-          if (stopped) return;
-          var input = e.inputBuffer.getChannelData(0), out = [], pos = carry, peak = 0;
-          while (pos < input.length) {
-            var i = Math.floor(pos), f = pos - i, a = input[i], b = i + 1 < input.length ? input[i + 1] : a;
-            out.push(a + (b - a) * f); pos += ratio;
-          }
-          carry = pos - input.length;
-          var pcm = new Int16Array(out.length);
-          for (var k = 0; k < out.length; k++) {
-            var s = Math.max(-1, Math.min(1, out[k])); pcm[k] = s < 0 ? s * 0x8000 : s * 0x7fff;
-            if (Math.abs(s) > peak) peak = Math.abs(s);
-          }
-          chunks.push(pcm);
-          pushStream.write(pcm.buffer);
-          if (onLevel) onLevel(Math.min(1, peak * 1.6));
-        };
-        source.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
-        cleanup = function () {
-          try { proc.disconnect(); source.disconnect(); mute.disconnect(); } catch (e) {}
-          stream.getTracks().forEach(function (t) { t.stop(); });
-        };
-
-        cfg.setProperty(SDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "8000");
-        cfg.setProperty(SDK.PropertyId.Speech_SegmentationSilenceTimeoutMs, "1300");
-        var level = scoringLevel();
-        var rec = new SDK.SpeechRecognizer(cfg, SDK.AudioConfig.fromStreamInput(pushStream));
-        scoringConfig(referenceText, level).applyTo(rec);
-        var safety = setTimeout(ctl.stop, 20000); // never record forever
-        if (onListening) onListening();
-        rec.recognizeOnceAsync(function (result) {
-          clearTimeout(safety); stopped = true; cleanup(); rec.close();
-          var recording = chunks.length ? wavFromChunks(chunks, RATE) : null;
-          handleResult(result, level, recording);
-        }, function (err) {
-          clearTimeout(safety); stopped = true; cleanup(); rec.close();
-          failed(String(err), level, chunks.length ? wavFromChunks(chunks, RATE) : null);
-        });
-
-        function handleResult(result, lvl, recording) {
-          if (result.reason === SDK.ResultReason.RecognizedSpeech) {
-            rememberScoringLevel(lvl);
-            resolve({ json: JSON.parse(result.properties.getProperty(SDK.PropertyId.SpeechServiceResponse_JsonResult)), recording: recording });
-          } else if (result.reason === SDK.ResultReason.NoMatch) {
-            reject(new Error("I didn't hear any Spanish. Tap Record, then speak clearly towards the iPad."));
-          } else {
-            failed(SDK.CancellationDetails.fromResult(result).errorDetails, lvl, recording);
-          }
-        }
-        // Azure sometimes refuses the detailed scoring request ("Could not
-        // validate speech context", websocket 1007). Then score the SAME
-        // recording again with simpler settings — no need to speak twice.
-        function failed(details, lvl, recording) {
-          if (/1007|1011|speech context|internal (server )?error/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
-            var next = lvl + 1; // remembered only once it actually works (handleResult)
-            var replay = SDK.AudioInputStream.createPushStream(SDK.AudioStreamFormat.getWaveFormatPCM(RATE, 16, 1));
-            chunks.forEach(function (c) { replay.write(c.buffer.slice(0)); });
-            replay.close();
-            var cfg2 = speechConfig();
-            var rec2 = new SDK.SpeechRecognizer(cfg2, SDK.AudioConfig.fromStreamInput(replay));
-            scoringConfig(referenceText, next).applyTo(rec2);
-            rec2.recognizeOnceAsync(function (r2) { rec2.close(); handleResult(r2, next, recording); },
-              function (e2) { rec2.close(); failed(String(e2), next, recording); });
-            return;
-          }
-          var err = new Error(friendly(details));
-          err.recording = recording; // so "Hear myself" still works
-          reject(err);
-        }
-      }).catch(function (err) {
-        reject(new Error(err && err.name === "NotAllowedError"
-          ? "The microphone is blocked. On iPad: Settings app → Safari → Microphone → Allow (or tap 'aA' in the address bar → Website Settings → Microphone → Allow)."
-          : "Could not start the microphone: " + (err && err.message || err)));
-      });
-    });
-    return ctl;
-  }
-
-  // ------------------------------------------------------------ practice screen
-  function fillDecks() {
-    var decks = store.decks(), items = store.items();
-    var sel = $("deck");
-    sel.innerHTML = '<option value="All">All decks (' + items.length + ")</option>" + decks.map(function (d) {
-      var n = items.filter(function (i) { return i.deck === d; }).length;
-      return '<option value="' + esc(d) + '">' + esc(d) + " (" + n + ")</option>";
+  // Lesson text: paragraphs, line breaks and **bold**.
+  function rich(text) {
+    return String(text || "").split(/\n\s*\n/).map(function (p) {
+      return "<p>" + esc(p.trim()).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>") + "</p>";
     }).join("");
-    if (state.deck !== "All" && decks.indexOf(state.deck) < 0) state.deck = "All";
-    sel.value = state.deck;
-    $("deck-names").innerHTML = decks.map(function (d) { return '<option value="' + esc(d) + '">'; }).join("");
   }
-  function nextItem() {
-    var res = store.chooseNext(state.deck, state.recent, state.shown, Date.now());
-    if (!res.item) { setStatus("This deck is empty."); return; }
-    showItem(res.item, res.why);
+  // Pronunciation guide: the stressed syllable (in CAPITALS) is shown in bold.
+  function tipHtml(tip) {
+    return esc(tip).replace(/[A-Za-zÁÉÍÓÚÑÜáéíóúñü]+/g, function (m, off, str) {
+      var upper = m === m.toUpperCase() && m !== m.toLowerCase();
+      if (!upper) return m;
+      if (m.length > 1 || str[off - 1] === "-" || str[off + m.length] === "-") return "<b>" + m + "</b>";
+      return m;
+    });
   }
-  var WHY = { "new": "New", review: "Review: due now", extra: "Extra practice" };
-  function showItem(item, why) {
-    state.item = item; state.why = why || ""; state.attemptsThisItem = []; state.lastRecording = null;
-    if (state.shown.indexOf(item.id) < 0) state.shown.push(item.id);
-    state.recent = state.recent.filter(function (id) { return id !== item.id; }).concat([item.id]).slice(-3);
-    $("es").textContent = item.es; $("en").textContent = item.en || "—"; $("fr").textContent = item.fr || "—";
-    $("why").textContent = (WHY[why] ? WHY[why] + " · " : "") + item.deck;
+  function bar(pct, cls) { return '<span class="pbar"><span class="pfill ' + (cls || "") + '" style="width:' + Math.max(0, Math.min(100, pct)) + '%"></span></span>'; }
+
+  // ------------------------------------------------------------ course
+  function buildIndex() {
+    var levels = state.course.levels.slice();
+    var mine = store.myWordsLevel(levels.length);
+    if (mine.units.length) levels.push(mine);
+    state.levels = levels;
+    state.units = {}; state.byKey = {}; state.courseKeys = [];
+    levels.forEach(function (l) {
+      l.units.forEach(function (u) {
+        state.units[u.id] = u;
+        u.items.forEach(function (it) {
+          if (!state.byKey[it.key]) { state.byKey[it.key] = { item: it, unit: u, level: l }; state.courseKeys.push(it.key); }
+        });
+      });
+    });
+    store.setCourse({ levels: levels });
+    $("deck-names").innerHTML = mine.units.map(function (u) { return '<option value="' + esc(u.title) + '">'; }).join("");
+  }
+  function courseUnits() {
+    var out = [];
+    state.course.levels.forEach(function (l) { l.units.forEach(function (u) { out.push(u); }); });
+    return out;
+  }
+  function nextUnit() {
+    var units = courseUnits();
+    for (var i = 0; i < units.length; i++) if (units[i].items.length && !store.unitProgress(units[i]).isLearned) return units[i];
+    return null;
+  }
+  function isSoundsLevel(entry) { return entry && entry.level && entry.level.index === 0 && !entry.level.custom; }
+
+  // ------------------------------------------------------------ home
+  function renderHome() {
+    var now = Date.now(), s = store.settings();
+    var up = nextUnit();
+    if (up) {
+      var p = store.unitProgress(up), lvl = state.course.levels[up.levelIndex];
+      $("next-card").innerHTML = '<div class="eyebrow">Up next</div><div class="next-title">' + esc(up.title) + '</div>' +
+        '<div class="meta">Level ' + lvl.number + " · " + esc(lvl.title) + "</div>" +
+        '<div class="next-bar">' + bar(p.pct) + " <span>" + p.pct + "% learned</span></div>" +
+        '<button class="big next" data-unit="' + esc(up.id) + '">Start ▶</button>';
+    } else {
+      $("next-card").innerHTML = '<div class="eyebrow">Up next</div><div class="next-title">🎉 You have learned the whole course!</div><div class="meta">Keep your reviews going so it stays fresh.</div>';
+    }
+    var due = store.dueKeys(state.courseKeys, now).length, newToday = store.newToday(now);
+    $("today-card").innerHTML = '<div class="eyebrow">Today</div>' +
+      '<div class="today-row"><span>New items</span><b>' + newToday + " / " + s.newPerDay + "</b></div>" +
+      '<div class="today-row"><span>Reviews due</span><b>' + due + "</b></div>" +
+      (due ? '<button class="mid primary" data-action="review">🔁 Review now (' + due + ")</button>" : '<div class="meta">No reviews due. 👍</div>');
+
+    var allSounds = store.weakSounds(SOUND_LABELS);
+    var weak = allSounds.filter(function (w) { return w.avg < 85; }).slice(0, 5);
+    $("weak-sounds").innerHTML = !allSounds.length ? '<div class="empty">After a few recordings, the sounds you find hardest will appear here.</div>'
+      : !weak.length ? '<div class="empty">No weak sounds right now: every sound averages 85 or more. 👏</div>' : weak.map(function (w) {
+      var info = SpanishSounds.soundInfo(w.key);
+      return '<div class="ws-row"><div class="ws-head"><b>' + esc(w.label) + '</b>' + bar(w.avg, colour(w.avg)) +
+        '<span class="val">' + Math.round(w.avg) + '</span><button class="small-btn" data-sound="' + esc(w.key) + '">Practise</button></div>' +
+        '<div class="ws-tip">' + esc(info.tip) + (info.fr ? ' <span class="fr-cmp">🇫🇷 ' + esc(info.fr) + "</span>" : "") + "</div></div>";
+    }).join("");
+
+    $("levels").innerHTML = state.levels.map(function (l) {
+      var learnedUnits = l.units.filter(function (u) { return store.unitProgress(u).isLearned; }).length;
+      return '<section class="level"><div class="level-head"><div><div class="eyebrow">' + (l.custom ? "Your own" : "Level " + l.number) + "</div>" +
+        "<h2>" + esc(l.title) + "</h2>" + (l.subtitle ? '<div class="meta">' + esc(l.subtitle) + "</div>" : "") + "</div>" +
+        '<div class="meta">' + learnedUnits + " / " + l.units.length + " units learned</div></div>" +
+        '<div class="unit-grid">' + l.units.map(function (u) {
+          var p = store.unitProgress(u, now);
+          return '<button class="unit-row' + (p.isLearned ? " learned" : "") + (up && up.id === u.id ? " current" : "") + '" data-unit="' + esc(u.id) + '">' +
+            '<span class="u-title">' + (p.isLearned ? "✓ " : "") + esc(u.title) + "</span>" +
+            '<span class="u-bar">' + bar(p.pct, p.isLearned ? "good" : "") + '<span class="u-pct">' + p.pct + "%</span></span>" +
+            '<span class="u-meta">' + p.total + (p.total === 1 ? " item" : " items") + (p.due ? ' · <span class="due">' + p.due + " due</span>" : "") + "</span></button>";
+        }).join("") + "</div></section>";
+    }).join("");
+  }
+
+  // ------------------------------------------------------------ unit (lesson)
+  function openUnit(id) {
+    var u = state.units[id];
+    if (!u) return;
+    state.unit = u;
+    var l = state.levels[u.levelIndex];
+    $("unit-level").textContent = (l.custom ? "My words" : "Level " + l.number + " · " + l.title);
+    $("unit-title").textContent = u.title;
+    renderUnitProgress();
+    $("unit-lesson").innerHTML = u.lesson ? rich(u.lesson) : "";
+    $("unit-lesson").classList.toggle("hidden", !u.lesson);
+    $("unit-examples").innerHTML = u.examples.map(function (e, i) {
+      return '<div class="example"><div class="ex-text"><div class="ex-es">' + esc(e.es) + "</div>" +
+        '<div class="meta">' + esc(e.en) + (e.fr ? " · " + esc(e.fr) : "") + "</div>" +
+        (e.tip ? '<div class="ex-tip">' + tipHtml(e.tip) + "</div>" : "") + "</div>" +
+        '<div class="ex-btns"><button class="mid" data-say="' + i + '">🔊 Listen</button><button class="mid" data-say="' + i + '" data-slow="1">🐢 Slow</button></div></div>';
+    }).join("");
+    $("unit-examples-panel").classList.toggle("hidden", !u.examples.length);
+    $("unit-items-count").textContent = "(" + u.items.length + ")";
+    $("unit-items").innerHTML = u.items.map(function (it) {
+      var e = store.item(it.key), learned = store.isItemLearned(it.key);
+      var pill = !e ? '<span class="pill none">new</span>' : '<span class="pill ' + colour(e.best || 0) + '">best ' + (e.best || 0) + "</span>";
+      return '<div class="list-row"><span>' + (learned ? "✓ " : "") + esc(it.es) + ' <span class="meta">' + esc(it.en) + "</span></span>" +
+        '<span class="row-end">' + pill + ' <button class="small-btn" data-practise="' + esc(it.key) + '">Practise</button></span></div>';
+    }).join("");
+    showView("unit");
+  }
+  function renderUnitProgress() {
+    var u = state.unit, p = store.unitProgress(u);
+    $("unit-progress").innerHTML = bar(p.pct, p.isLearned ? "good" : "") + " <b>" + p.pct + "% learned</b>" +
+      ' <span class="meta">(' + p.learned + " of " + p.total + " items scored 80+ on two different days" + (p.isLearned ? " · ✓ unit learned" : "; 80% needed") + ")</span>";
+  }
+  function sayExample(i, slow) {
+    var e = state.unit && state.unit.examples[i];
+    if (!e) return;
+    Speech.speak(e.es, slow).catch(function (err) { if (!Speech.speakFallback(e.es, slow)) alert(err.message); });
+  }
+
+  // ------------------------------------------------------------ practice sessions
+  /*
+   * session.type: "unit" (one unit, spaced repetition), "review" (everything
+   * due in the course), "list" (a fixed list, e.g. a sound drill).
+   */
+  function startSession(sess) {
+    sess.done = 0; sess.moreNew = false; sess.extraOk = false;
+    state.session = sess; state.recent = []; state.shown = [];
+    if (sess.type === "unit") sess.returnTo = sess.unit.id;
+    $("practice-back").textContent = sess.returnTo ? "← Unit" : "← Home";
+    showView("practice");
+    nextInSession();
+  }
+  function sessionLabel() {
+    var s = state.session;
+    var name = s.type === "unit" ? s.unit.title : s.label;
+    return name + " · " + s.done + " done";
+  }
+  function nextInSession() {
+    var s = state.session;
+    Speech.stopPlayback();
+    $("practice-end").classList.add("hidden");
+    $("practice-main").classList.remove("hidden");
+    var key = null, why = "";
+    if (s.type === "list") {
+      key = s.queue.shift(); why = "extra";
+      if (!key) return endSession("done");
+    } else {
+      var r = store.chooseNext(s.keys, { exclude: state.recent, shown: state.shown, moreNew: s.moreNew, extraOk: s.extraOk });
+      if (s.type === "review" && r.why !== "review") return endSession("reviews-done");
+      if (r.why === "limit") return endSession("limit", r);
+      if (r.why === "extra" && !s.extraOk) return endSession("all-done");
+      if (!r.key) return endSession("done");
+      key = r.key; why = r.why;
+    }
+    showItem(state.byKey[key], why);
+  }
+  function endSession(reason, r) {
+    var s = state.session, html = "", n = store.settings().newPerDay;
+    if (reason === "limit") {
+      html = "<h3>That's today's " + n + " new items 👏</h3><p>New items are limited to " + n + " a day so you can remember them. " +
+        "Items you found hard will come back for review. There " + (r.freshLeft === 1 ? "is 1 new item" : "are " + r.freshLeft + " new items") + " left in this unit.</p>" +
+        '<div class="row"><button class="mid primary" data-end="more">Continue with new items anyway</button>' +
+        (s.keys.some(function (k) { return store.item(k); }) ? '<button class="mid" data-end="extra">Extra practice of items I\'ve seen</button>' : "") +
+        '<button class="mid" data-end="back">Back</button></div>';
+    } else if (reason === "all-done") {
+      html = "<h3>All done here for now ✅</h3><p>Nothing in this unit is due for review right now. Items come back after a few minutes (if they were hard) up to several weeks (if they were easy).</p>" +
+        '<div class="row"><button class="mid primary" data-end="extra">Keep practising anyway</button><button class="mid" data-end="back">Back</button></div>';
+    } else if (reason === "reviews-done") {
+      html = "<h3>All reviews done ✅</h3><p>Come back later or tomorrow for the next ones.</p>" +
+        '<div class="row"><button class="mid primary" data-end="home">Home</button></div>';
+    } else {
+      html = "<h3>Finished ✅</h3>" + '<div class="row"><button class="mid primary" data-end="back">Back</button></div>';
+    }
+    if (s.type === "unit") {
+      var p = store.unitProgress(s.unit);
+      html += '<p class="meta">This unit: ' + p.pct + "% learned" + (p.isLearned ? " · ✓ learned" : "") + "</p>";
+    }
+    $("practice-session").textContent = sessionLabel();
+    $("practice-end").innerHTML = html;
+    $("practice-end").classList.remove("hidden");
+    $("practice-main").classList.add("hidden");
+  }
+  var WHY = { "new": "New", review: "Review", extra: "Extra practice" };
+  function showItem(entry, why) {
+    var it = entry.item;
+    state.entry = entry; state.why = why || ""; state.attemptsThisItem = []; state.lastRecording = null;
+    if (state.shown.indexOf(it.key) < 0) state.shown.push(it.key);
+    state.recent = state.recent.filter(function (k) { return k !== it.key; }).concat([it.key]).slice(-3);
+    $("es").textContent = it.es; $("en").textContent = it.en || "—";
+    $("fr").textContent = it.fr || "—"; $("tip").innerHTML = it.tip ? tipHtml(it.tip) : "—";
+    reveal(false);
+    $("why").textContent = (WHY[why] ? WHY[why] + " · " : "") + entry.unit.title;
     $("result").classList.add("hidden");
     $("btn-me").disabled = true;
+    $("practice-session").textContent = sessionLabel();
     setStatus("");
+    // Play the model first
+    if (store.isConfigured()) listen(false, true);
   }
-  function listen(slow) {
-    if (!state.item || state.recording) return;
-    audio();
-    setStatus(slow ? "Playing slowly…" : "Playing…");
-    speak(state.item.es, slow).then(function () { if (/^Playing/.test($("status").textContent)) setStatus(""); })
-      .catch(function (e) {
-        if (speakFallback(state.item.es, slow)) setStatus("Using the iPad's own voice because Azure didn't answer: " + e.message, true);
-        else setStatus(e.message + (e.help ? " " + e.help : ""), true);
-      });
+  function reveal(on) {
+    each(".reveal", function (el) { el.classList.toggle("hidden", !on); });
+    $("btn-reveal").classList.toggle("hidden", on);
+  }
+  function listen(slow, auto) {
+    if (!state.entry || state.recording) return;
+    var es = state.entry.item.es;
+    setStatus(auto ? "🔊 Listen, then tap 🎤 Record and say it." : slow ? "Playing slowly…" : "Playing…");
+    Speech.speak(es, slow).then(function () {
+      if (/^Playing/.test($("status").textContent)) setStatus("");
+    }).catch(function (e) {
+      if (Speech.speakFallback(es, slow)) setStatus("Using the iPad's own voice because Azure didn't answer: " + e.message, true);
+      else setStatus(e.message + (e.help ? " " + e.help : ""), true);
+    });
   }
   function record() {
-    if (!state.item) return;
+    if (!state.entry) return;
     if (state.recording) { state.recording.stop(); return; } // second tap = stop
-    stopPlayback();
-    var btn = $("btn-record"), item = state.item, level = $("rec-level"), bar = $("rec-level-bar");
+    Speech.stopPlayback();
+    var btn = $("btn-record"), entry = state.entry, it = entry.item, level = $("rec-level"), barEl = $("rec-level-bar");
+    var unitBefore = store.unitProgress(entry.unit).isLearned, itemBefore = store.isItemLearned(it.key);
     btn.textContent = "⏳ Starting…";
     setStatus("Starting the microphone…");
-    var ctl = assess(item.es, function () {
+    var ctl = Speech.assess(it.es, function () {
       btn.classList.add("recording"); btn.textContent = "⏹ Stop";
       level.classList.remove("hidden");
-      setStatus("Speak now: “" + item.es + "”. It stops by itself when you finish.");
-    }, function (v) { bar.style.width = Math.round(v * 100) + "%"; });
+      setStatus("Speak now: “" + it.es + "”. It stops by itself when you finish.");
+    }, function (v) { barEl.style.width = Math.round(v * 100) + "%"; });
     state.recording = ctl;
     ctl.promise.then(function (res) {
-      if (state.item !== item) return;
-      var a = SpanishSounds.analyse(item.es, res.json);
+      if (state.entry !== entry) return;
+      var a = SpanishSounds.analyse(it.es, res.json);
       var first = state.attemptsThisItem.length === 0;
       state.attemptsThisItem.push(a.overall);
-      showResult(a);
-      if (res.recording) {
-        if (res.recording) { state.lastRecording = res.recording; $("btn-me").disabled = false; }
-      }
-      var saved = store.recordAttempt({ item_id: item.id, first: first, overall: a.overall, accuracy: a.accuracy,
+      if (first) state.session.done++;
+      showResult(a, isSoundsLevel(entry));
+      reveal(true);
+      if (res.recording) { state.lastRecording = res.recording; $("btn-me").disabled = false; }
+      var saved = store.recordAttempt({ key: it.key, first: first, overall: a.overall, accuracy: a.accuracy,
         fluency: a.fluency, completeness: a.completeness, sounds: a.sounds });
-      setStatus(saved.saved ? (first ? "Tap 🎤 Record to try again, or Next ➡ to move on." : "Try as often as you like.")
-                            : "Warning: your result could not be saved (iPad storage full or blocked).", !saved.saved);
+      var msg = first ? "Tap 🎤 Record to try again, or Next ➡ to move on." : "Try as often as you like.";
+      if (saved.learned && !itemBefore) msg = "✓ Learned! (80+ on two different days) " + msg;
+      if (!unitBefore && store.unitProgress(entry.unit).isLearned) msg = "🎉 Unit “" + entry.unit.title + "” learned! " + msg;
+      setStatus(saved.saved ? msg : "Warning: your result could not be saved (iPad storage full or blocked).", !saved.saved);
+      $("practice-session").textContent = sessionLabel();
     }).catch(function (e) {
-      if (e.recording && state.item === item) { state.lastRecording = e.recording; $("btn-me").disabled = false; }
+      if (e.recording && state.entry === entry) { state.lastRecording = e.recording; $("btn-me").disabled = false; }
       setStatus(e.message + (e.help ? " " + e.help : "") +
         (e.recording ? " You can still tap 👂 Hear myself, or 🎤 Record to try again." : ""), true);
     }).then(function () {
       state.recording = null;
       btn.classList.remove("recording"); btn.textContent = "🎤 Record";
-      level.classList.add("hidden"); bar.style.width = "0";
+      level.classList.add("hidden"); barEl.style.width = "0";
     });
   }
   function markWord(w) {
@@ -386,7 +303,7 @@
     for (var j = 0; j < text.length; j++) out += under[j] ? "<u>" + esc(text[j]) + "</u>" : esc(text[j]);
     return out.replace(/<\/u><u>/g, "");
   }
-  function showResult(a) {
+  function showResult(a, soundsLevel) {
     var setNum = function (id, v) { var el = $(id); el.textContent = v; el.className = "num " + colour(v); };
     setNum("s-overall", a.overall); setNum("s-accuracy", a.accuracy); setNum("s-fluency", a.fluency); setNum("s-complete", a.completeness);
     var wordsEl = $("words");
@@ -396,9 +313,16 @@
     var tips = [];
     a.words.forEach(function (w) {
       (w.problems || []).forEach(function (p) {
-        if (p.message) tips.push('<div class="tip"><b class="w">' + esc(w.text) + "</b> — " + esc(p.message) + "</div>");
-        else tips.push('<div class="tip"><b class="w">' + esc(w.text) + '</b> — <span class="snd">' + esc(p.spelling) + "</span> " +
-          esc(p.label) + " (" + p.score + "). " + esc(p.tip) + "</div>");
+        if (p.message) { tips.push('<div class="tip"><b class="w">' + esc(w.text) + "</b> — " + esc(p.message) + "</div>"); return; }
+        if (soundsLevel) {
+          // Level 1: name the exact sound and compare with French
+          tips.push('<div class="tip sound-focus"><div class="sf-head">Sound: <b>' + esc(p.label) + '</b> — <span class="snd">' + esc(p.spelling) +
+            "</span> in <b>" + esc(w.text) + "</b> <span class=\"meta\">(score " + p.score + ")</span></div>" +
+            "<div>" + esc(p.tip) + "</div>" + (p.french ? '<div class="fr-cmp">🇫🇷 ' + esc(p.french) + "</div>" : "") + "</div>");
+        } else {
+          tips.push('<div class="tip"><b class="w">' + esc(w.text) + '</b> — <span class="snd">' + esc(p.spelling) + "</span> " +
+            esc(p.label) + " (" + p.score + "). " + esc(p.tip) + "</div>");
+        }
       });
     });
     if (a.inserted.length) tips.push('<div class="tip">Extra words I heard that are not in the sentence: <b>' + esc(a.inserted.join(", ")) + "</b></div>");
@@ -408,10 +332,10 @@
     $("attempts").textContent = "Attempts on this item: " + att.length + " · best " + Math.max.apply(null, att) +
       (att.length > 1 ? " · scores " + att.join(" → ") : "") + (a.heard ? " · Azure heard: “" + a.heard + "”" : "");
     $("result").classList.remove("hidden");
-    Array.prototype.forEach.call(wordsEl.querySelectorAll(".word"), function (el) {
+    each(".word", function (el) {
       el.addEventListener("click", function () {
         var w = a.words[+el.dataset.i];
-        Array.prototype.forEach.call(wordsEl.querySelectorAll(".word"), function (x) { x.classList.remove("selected"); });
+        each(".word", function (x) { x.classList.remove("selected"); }, wordsEl);
         el.classList.add("selected");
         var old = $("unit-detail"); if (old) old.remove();
         if (!w.units) return;
@@ -423,26 +347,39 @@
           }).join("") + "</div>";
         $("tips").prepend(d);
       });
+    }, wordsEl);
+  }
+  /* Practise one sound: items containing it, weakest first (max 10). */
+  function soundDrill(soundKey) {
+    var withSound = state.courseKeys.filter(function (k) {
+      return SpanishSounds.sentenceToSounds(state.byKey[k].item.es).some(function (w) {
+        return w.units.some(function (u) { return u.key === soundKey; });
+      });
     });
+    withSound.sort(function (a, b) {
+      var ea = store.item(a), eb = store.item(b);
+      return (ea ? ea.last_score : 101) - (eb ? eb.last_score : 101) || state.byKey[a].item.es.length - state.byKey[b].item.es.length;
+    });
+    startSession({ type: "list", queue: withSound.slice(0, 10), label: "Sound: " + SOUND_LABELS[soundKey] });
   }
 
   // ------------------------------------------------------------ progress screen
   function loadProgress() {
-    var p = store.progress(SOUND_LABELS, Date.now());
-    var tiles = [[p.items_practised + " / " + p.items_total, "items practised"], [p.total_attempts, "recordings made"],
-                 [p.due_now, "due for review now"], [p.mastered, "items mastered"]];
+    var p = store.progress(SOUND_LABELS, state.courseKeys, Date.now());
+    var tiles = [[p.items_learned + " / " + p.items_total, "items learned"], [p.items_practised, "items practised"],
+                 [p.total_attempts, "recordings made"], [p.due_now, "due for review now"]];
     $("tiles").innerHTML = tiles.map(function (t) { return '<div class="tile"><div class="v">' + t[0] + '</div><div class="l">' + t[1] + "</div></div>"; }).join("");
     drawChart(p.daily);
     $("sound-list").innerHTML = p.sounds.length ? p.sounds.slice(0, 12).map(function (s) {
-      var info = SpanishSounds.SOUNDS[s.key] || {};
+      var info = SpanishSounds.soundInfo(s.key);
       return '<details class="bar-detail"><summary class="bar-row"><span>' + esc(s.label) + '</span><span class="bar-track"><span class="bar-fill ' +
         colour(s.avg) + '" style="width:' + Math.max(2, s.avg) + '%"></span></span><span class="val">' + Math.round(s.avg) + "</span></summary>" +
-        (info.tip ? '<div class="bar-tip">' + esc(info.tip) + "</div>" : "") + "</details>";
+        '<div class="bar-tip">' + esc(info.tip) + (info.fr ? "<br>🇫🇷 " + esc(info.fr) : "") + "</div></details>";
     }).join("") + '<p class="hint">Weakest first, from your recent recordings. Tap a sound for a tip.</p>'
       : '<div class="empty">Practise a few items and your sounds will appear here.</div>';
     $("weak-list").innerHTML = p.weak_items.length ? p.weak_items.slice(0, 10).map(function (w) {
-      return '<div class="list-row"><span>' + esc(w.es) + ' <span class="meta">· ' + esc(w.deck) + '</span></span><span class="row-end"><span class="pill ' +
-        colour(w.last_score) + '">' + w.last_score + '</span> <button class="small-btn" data-practise="' + esc(w.id) + '">Practise</button></span></div>';
+      return '<div class="list-row"><span>' + esc(w.es) + ' <span class="meta">· ' + esc(w.unit) + '</span></span><span class="row-end"><span class="pill ' +
+        colour(w.last_score) + '">' + w.last_score + '</span> <button class="small-btn" data-practise="' + esc(w.key) + '">Practise</button></span></div>';
     }).join("") : '<div class="empty">Nothing yet.</div>';
   }
   function drawChart(daily) {
@@ -468,10 +405,10 @@
         esc(d.day + ": average " + d.avg + " (" + d.count + " items)") + '"/>';
     });
     el.innerHTML = svg + '</svg><div class="chart-readout" id="chart-readout">Tap a point to see its value.</div>';
-    Array.prototype.forEach.call(el.querySelectorAll(".hit"), function (n) {
+    each(".hit", function (n) {
       var show = function () { $("chart-readout").textContent = n.getAttribute("data-tip"); };
       n.addEventListener("click", show); n.addEventListener("mouseenter", show);
-    });
+    }, el);
   }
   function backup() {
     var name = "spanish-practice-backup-" + new Date().toISOString().slice(0, 10) + ".json";
@@ -485,24 +422,40 @@
     a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
   }
 
-  // ------------------------------------------------------------ my words screen
+  // ------------------------------------------------------------ my words
   function loadWordList() {
-    fillDecks();
-    var items = store.items(), html = "";
-    store.decks().forEach(function (d) {
-      html += '<div class="deck-title">' + esc(d) + "</div>";
-      items.filter(function (i) { return i.deck === d; }).forEach(function (i) {
-        var sc = i.last_score;
-        html += '<div class="list-row"><span>' + esc(i.es) + ' <span class="meta">' + esc(i.en || "") + (i.fr ? " · " + esc(i.fr) : "") + '</span></span><span class="row-end">' +
-          '<span class="pill ' + (sc == null ? "none" : colour(sc)) + '">' + (sc == null ? "new" : sc) + "</span> " +
-          '<button class="small-btn" data-practise="' + esc(i.id) + '">Practise</button>' +
-          (i.custom ? ' <button class="small-btn" data-delete="' + esc(i.id) + '">Delete</button>' : "") + "</span></div>";
-      });
-    });
-    $("all-items").innerHTML = html;
+    var mine = store.data.myItems;
+    $("all-items").innerHTML = mine.length ? mine.map(function (i) {
+      var e = store.item(Store_key(i.es));
+      return '<div class="list-row"><span>' + esc(i.es) + ' <span class="meta">' + esc(i.en || "") + (i.fr ? " · " + esc(i.fr) : "") + " · " + esc(i.deck) + "</span></span>" +
+        '<span class="row-end"><span class="pill ' + (e ? colour(e.best || 0) : "none") + '">' + (e ? "best " + (e.best || 0) : "new") + "</span> " +
+        '<button class="small-btn" data-practise="' + esc(Store_key(i.es)) + '">Practise</button> <button class="small-btn" data-delete="' + esc(i.id) + '">Delete</button></span></div>';
+    }).join("") : '<div class="empty">No words of your own yet.</div>';
   }
+  function Store_key(es) { return PracticeStore.itemKey(es); }
 
-  // ------------------------------------------------------------ setup
+  // ------------------------------------------------------------ settings & setup
+  function fillVoices() {
+    var acc = $("accent-input").value, cur = store.settings().voice;
+    $("voice-input").innerHTML = Speech.VOICES[acc].map(function (v) { return '<option value="' + v[0] + '">' + esc(v[1]) + "</option>"; }).join("");
+    $("voice-input").value = Speech.VOICES[acc].some(function (v) { return v[0] === cur; }) ? cur : Speech.VOICES[acc][0][0];
+  }
+  function renderSettings() {
+    var s = store.settings();
+    $("accent-input").value = s.accent; fillVoices();
+    $("speed-input").value = s.speed; $("newperday-input").value = s.newPerDay;
+    var c = state.course, r = c.report, info;
+    if (c.source === Course.FILE) {
+      info = "Course file: <b>" + esc(Course.FILE) + "</b> — " + r.levels + " levels, " + r.units + " units, " + r.items + " practice items, " + r.examples + " example phrases.";
+    } else {
+      info = "<b>" + esc(Course.FILE) + " could not be loaded</b> (" + esc(c.problem) + "), so the built-in word decks are shown instead.";
+    }
+    if (r.skipped.length) info += "<br>Skipped " + r.skipped.length + " item(s) without Spanish text, e.g. " + esc(r.skipped[0]) + ".";
+    if (r.duplicates) info += "<br>" + r.duplicates + " repeated item(s) inside a unit were shown once.";
+    info += ' <button class="small-btn" id="reload-course">↻ Reload course</button>';
+    $("course-info").innerHTML = info;
+    checkSettings();
+  }
   function check(id, ok, html, mark) {
     var li = $(id); li.classList.remove("pass", "fail");
     if (ok !== null) li.classList.add(ok ? "pass" : "fail");
@@ -512,15 +465,13 @@
   function checkSettings() {
     var s = store.settings();
     $("region-input").value = s.region || "";
-    $("voice-input").value = s.voice; $("speed-input").value = s.speed;
-    if (!Store_keyOk(s.key)) check("chk-settings", false, "Paste <b>KEY 1</b> and the <b>Location/Region</b> from your Azure Speech resource (page “Keys and Endpoint”), then tap Save.");
+    if (!PracticeStore.keyLooksValid(s.key)) check("chk-settings", false, "Paste <b>KEY 1</b> and the <b>Location/Region</b> from your Azure Speech resource (page “Keys and Endpoint”), then tap Save.");
     else if (!s.region) check("chk-settings", false, "The key is saved, but the region is missing (for example <code>westeurope</code>).");
     else check("chk-settings", true, "Key saved on this iPad (ending in …" + esc(s.key.slice(-4)) + "). Region: <b>" + esc(s.region) + "</b>. To change it, paste a new key below.");
     var home = isStandalone();
     check("chk-home", home, home ? "Opened from the Home Screen. Your results are kept safely."
       : "In Safari, tap the <b>Share</b> button (square with an arrow) → <b>Add to Home Screen</b> → <b>Add</b>. Then always open the program from that icon: this keeps your results safe (Safari can delete data from websites you haven't visited for a while).");
   }
-  function Store_keyOk(k) { return PracticeStore.keyLooksValid(k); }
   function checkAzure() {
     check("chk-azure", null, "Contacting Azure…");
     var timeout = new Promise(function (_, reject) {
@@ -530,15 +481,15 @@
         reject(e);
       }, 20000);
     });
-    Promise.race([speak("Hola, vamos a practicar.", false), timeout]).then(function () {
+    Promise.race([Speech.speak("Hola, vamos a practicar.", false), timeout]).then(function () {
       check("chk-azure", true, "Connected to Azure. You should have heard “Hola, vamos a practicar.” If you heard nothing: turn up the volume, and open Control Center (swipe down from the top-right corner) — if the bell (Silent Mode) is on, tap it off, then test again.");
     }).catch(function (e) { check("chk-azure", false, esc(e.message) + (e.help ? "<br>" + esc(e.help) : "")); });
   }
   function checkMic() {
-    audio();
+    Speech.audio();
     if (!navigator.mediaDevices) { check("chk-mic", false, "This browser can't use the microphone here. Please use Safari."); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-      var ctx = audio(), an = ctx.createAnalyser(); an.fftSize = 512;
+      var ctx = Speech.audio(), an = ctx.createAnalyser(); an.fftSize = 512;
       var src = ctx.createMediaStreamSource(stream); src.connect(an);
       var data = new Uint8Array(an.fftSize), peak = 0, t0 = Date.now();
       $("meter").classList.remove("hidden");
@@ -546,8 +497,8 @@
       (function loop() {
         an.getByteTimeDomainData(data);
         var max = 0; for (var i = 0; i < data.length; i++) max = Math.max(max, Math.abs(data[i] - 128));
-        var level = Math.min(100, max / 128 * 160); peak = Math.max(peak, level);
-        $("meter-bar").style.width = level + "%";
+        var lvl = Math.min(100, max / 128 * 160); peak = Math.max(peak, lvl);
+        $("meter-bar").style.width = lvl + "%";
         if (Date.now() - t0 < 6000) return requestAnimationFrame(loop);
         src.disconnect(); stream.getTracks().forEach(function (t) { t.stop(); });
         $("meter").classList.add("hidden");
@@ -561,46 +512,78 @@
   function checkPron() {
     if (state.recording) return;
     check("chk-pron", null, "Starting the microphone…");
-    var ctl = assess("Hola, buenos días", function () { check("chk-pron", null, "🔴 Say: <b>“Hola, buenos días”</b>", "🎤"); });
+    var ctl = Speech.assess("Hola, buenos días", function () { check("chk-pron", null, "🔴 Say: <b>“Hola, buenos días”</b>", "🎤"); });
     state.recording = ctl;
     ctl.promise.then(function (res) {
       var a = SpanishSounds.analyse("Hola, buenos días", res.json);
       check("chk-pron", true, "It works! Your score: <b>" + a.overall + "</b> (accuracy " + a.accuracy + ", fluency " + a.fluency + "). " +
         a.words.map(function (w) { return '<span class="pill ' + w.colour + '">' + esc(w.text) + " " + w.score + "</span>"; }).join(" ") +
-        "<br>Everything is ready. Go to <b>Practise</b>.");
+        "<br>Everything is ready. Go to <b>Home</b>.");
     }).catch(function (e) { check("chk-pron", false, esc(e.message) + (e.help ? "<br>" + esc(e.help) : "")); })
       .then(function () { state.recording = null; });
   }
 
   // ------------------------------------------------------------ navigation & events
   function showView(name) {
-    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) { t.classList.toggle("active", t.dataset.view === name); });
-    Array.prototype.forEach.call(document.querySelectorAll(".view"), function (v) { v.classList.toggle("active", v.id === "view-" + name); });
+    if (state.recording && name !== "practice") { state.recording.stop(); }
+    each(".tab", function (t) {
+      var tabFor = { unit: "home", practice: "home" }[name] || name;
+      t.classList.toggle("active", t.dataset.view === tabFor);
+    });
+    each(".view", function (v) { v.classList.toggle("active", v.id === "view-" + name); });
+    if (name === "home") renderHome();
     if (name === "progress") loadProgress();
     if (name === "words") loadWordList();
-    if (name === "setup") checkSettings();
+    if (name === "setup") renderSettings();
+    if (name === "unit" && state.unit) renderUnitProgress();
     window.scrollTo(0, 0);
   }
-  function practiseById(id) {
-    var item = store.items().filter(function (i) { return i.id === id; })[0];
-    if (item) { showView("practice"); showItem(item, "extra"); }
+  function practiseKey(key) {
+    if (!state.byKey[key]) return;
+    var fromUnit = $("view-unit").classList.contains("active") && state.unit ? state.unit.id : null;
+    startSession({ type: "list", queue: [key], label: state.byKey[key].item.es, returnTo: fromUnit });
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) { t.addEventListener("click", function () { showView(t.dataset.view); }); });
+  each(".tab", function (t) { t.addEventListener("click", function () { if (state.course) showView(t.dataset.view); }); });
   $("btn-listen").addEventListener("click", function () { listen(false); });
   $("btn-slow").addEventListener("click", function () { listen(true); });
   $("btn-record").addEventListener("click", record);
-  $("btn-me").addEventListener("click", function () { if (state.lastRecording && !state.recording) playAudioData(state.lastRecording, "audio/wav").catch(function (e) { setStatus(e.message, true); }); });
-  $("btn-next").addEventListener("click", function () { if (!state.recording) { stopPlayback(); nextItem(); } });
-  $("deck").addEventListener("change", function (e) {
-    state.deck = e.target.value; try { localStorage.setItem("spanishPractice.deck", state.deck); } catch (er) {}
-    nextItem();
+  $("btn-me").addEventListener("click", function () {
+    if (state.lastRecording && !state.recording) Speech.playAudioData(state.lastRecording, "audio/wav").catch(function (e) { setStatus(e.message, true); });
+  });
+  $("btn-next").addEventListener("click", function () { if (!state.recording) nextInSession(); });
+  $("btn-reveal").addEventListener("click", function () { reveal(true); });
+  $("btn-start-practice").addEventListener("click", function () {
+    var u = state.unit;
+    startSession({ type: "unit", unit: u, keys: u.items.map(function (i) { return i.key; }) });
+  });
+  $("practice-back").addEventListener("click", function () {
+    Speech.stopPlayback();
+    if (state.session && state.session.returnTo) openUnit(state.session.returnTo); else showView("home");
   });
   document.addEventListener("click", function (e) {
-    var p = e.target.closest && e.target.closest("[data-practise]");
-    if (p) practiseById(p.dataset.practise);
-    var d = e.target.closest && e.target.closest("[data-delete]");
-    if (d && confirm("Delete this item?")) { store.deleteItem(d.dataset.delete); loadWordList(); }
+    var t = e.target.closest ? e.target : null;
+    if (!t) return;
+    var el;
+    if ((el = t.closest("[data-unit]"))) { Speech.audio(); openUnit(el.dataset.unit); return; }
+    if ((el = t.closest("[data-go]"))) { showView(el.dataset.go); return; }
+    if ((el = t.closest("[data-say]"))) { sayExample(+el.dataset.say, !!el.dataset.slow); return; }
+    if ((el = t.closest("[data-sound]"))) { soundDrill(el.dataset.sound); return; }
+    if ((el = t.closest("[data-action=review]"))) { startSession({ type: "review", keys: state.courseKeys.slice(), label: "Review" }); return; }
+    if ((el = t.closest("[data-practise]"))) { practiseKey(el.dataset.practise); return; }
+    if ((el = t.closest("[data-delete]"))) {
+      if (confirm("Delete this item?")) { store.deleteItem(el.dataset.delete); buildIndex(); loadWordList(); }
+      return;
+    }
+    if ((el = t.closest("[data-end]"))) {
+      var act = el.dataset.end, s = state.session;
+      if (act === "more") { s.moreNew = true; nextInSession(); }
+      else if (act === "extra") { s.extraOk = true; nextInSession(); }
+      else if (act === "home" || !s.returnTo) showView("home");
+      else openUnit(s.returnTo);
+      return;
+    }
+    if (t.id === "reload-course") { loadCourse().then(function () { renderSettings(); $("course-msg").textContent = "Course reloaded."; }); }
   });
   document.addEventListener("keydown", function (e) {
     if (!$("view-practice").classList.contains("active") || e.target.matches("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
@@ -614,21 +597,33 @@
     if (res.error) { $("add-msg").textContent = res.error; return; }
     $("add-msg").textContent = "Added “" + res.item.es + "” to " + res.item.deck + ".";
     $("add-es").value = $("add-en").value = $("add-fr").value = "";
-    loadWordList();
+    buildIndex(); loadWordList();
   });
   $("add-listen").addEventListener("click", function () {
     var t = $("add-es").value.trim();
-    if (t) speak(t, false).catch(function (er) { $("add-msg").textContent = er.message; });
+    if (t) Speech.speak(t, false).catch(function (er) { $("add-msg").textContent = er.message; });
+  });
+  $("accent-input").addEventListener("change", fillVoices);
+  $("course-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var before = store.settings().accent + store.settings().voice;
+    var err = store.saveSettings({ accent: $("accent-input").value, voice: $("voice-input").value,
+      speed: $("speed-input").value, newPerDay: $("newperday-input").value });
+    if (err) { $("course-msg").textContent = err; $("course-msg").className = "status error"; return; }
+    SpanishSounds.setAccent(store.settings().accent);
+    if (before !== store.settings().accent + store.settings().voice) Speech.clearCache();
+    $("course-msg").className = "status";
+    $("course-msg").textContent = "Saved. Accent: " + (store.settings().accent === "es-MX" ? "Mexico" : "Spain") + ", " + store.settings().newPerDay + " new items per day.";
   });
   $("key-form").addEventListener("submit", function (e) {
     e.preventDefault();
-    var patch = { region: $("region-input").value, voice: $("voice-input").value, speed: $("speed-input").value };
+    var patch = { region: $("region-input").value };
     var key = $("key-input").value.trim();
     if (key) patch.key = key;
     else if (!store.settings().key) { check("chk-settings", false, "Please paste KEY 1 first."); return; }
     var err = store.saveSettings(patch);
     if (err) { check("chk-settings", false, esc(err)); return; }
-    $("key-input").value = ""; state.audioCache = {};
+    $("key-input").value = ""; Speech.clearCache();
     checkSettings();
     if (store.isConfigured()) checkAzure();
   });
@@ -644,15 +639,27 @@
       if (!confirm("Replace the results on this iPad with the ones in this backup?")) return;
       var err = store.importJSON(String(r.result));
       $("backup-msg").textContent = err || "Backup restored.";
-      fillDecks(); loadProgress();
+      buildIndex(); loadProgress();
     };
     r.readAsText(f); e.target.value = "";
   });
   $("home-hint-close").addEventListener("click", function () { $("home-hint").classList.add("hidden"); });
 
   // ------------------------------------------------------------ start
-  fillDecks();
-  nextItem();
-  if (isTouchApple() && !isStandalone()) $("home-hint").classList.remove("hidden");
-  if (!store.isConfigured()) showView("setup");
+  function loadCourse() {
+    return Course.load(window.BUILTIN_DECKS).then(function (c) {
+      state.course = c;
+      buildIndex();
+      var prob = $("course-problem");
+      if (c.source !== Course.FILE) {
+        prob.innerHTML = "⚠️ The course file (" + esc(Course.FILE) + ") could not be loaded: " + esc(c.problem) + ". Showing the old word decks instead.";
+        prob.classList.remove("hidden");
+      } else prob.classList.add("hidden");
+    });
+  }
+  $("levels").innerHTML = '<div class="empty">Loading the course…</div>';
+  loadCourse().then(function () {
+    if (isTouchApple() && !isStandalone()) $("home-hint").classList.remove("hidden");
+    showView(store.isConfigured() ? "home" : "setup");
+  });
 })();

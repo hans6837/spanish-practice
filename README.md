@@ -1,6 +1,6 @@
 # Spanish Pronunciation Practice
 
-Practise speaking Spanish (Spain, es-ES) on your iPad and get feedback sound by sound,
+A Spanish course on your iPad (Spain or Mexico accent) and get feedback sound by sound,
 scored by Microsoft Azure "Pronunciation Assessment".
 
 It is a web page that runs entirely in Safari: no app to install.
@@ -20,26 +20,45 @@ The program opens on the **Setup** tab:
 2. **Microphone → Test**: tap **Allow**, speak, and watch the bar move.
 3. **Pronunciation test → Test**: say "Hola, buenos días".
 
-## Practising
+## The course
+
+The course lives in **`spanish_course.json`** (6 levels: sounds → A1 → A2 → B1 → B2 → C1, ending with clinical
+physiotherapy language). Each level has units; each unit has a short lesson, example phrases and practice items
+(Spanish, English, French and a pronunciation tip with the stressed syllable in CAPITALS).
+
+- **Home** shows all levels and units with the % learned, an **Up next** button (the first unit not yet learned),
+  today's new items and reviews due, and **your weakest sounds** across the whole course.
+- A **unit counts as learned** when 80% of its items have scored **80 or more on two different days**.
+- Nothing is locked: open any unit at any time.
+- In a unit: read the lesson, listen to the example phrases (🔊 Listen / 🐢 Slow), then tap **Practice**.
+  For each item the model plays, you record, and you get your scores; the tip and the French translation
+  appear after your attempt.
+- **Spaced repetition:** items you score badly on come back after a few other items; good ones come back
+  after 1, 3, 7, 14, then 30 days. New items are limited per day (Settings, default 10); you can always continue anyway.
+- **Level 1 (the sounds)** names the exact sound that was wrong and compares it with French
+  (for example "keep the r at the tip of the tongue, not in the throat like French").
+- **Settings:** accent (Spain es-ES or Mexico es-MX, used for the model voice *and* the scoring),
+  voice, speed and new items per day.
+
+**Updating the course:** replace `spanish_course.json` with a new version. The app reads it fresh each time it
+opens. Your progress is linked to the Spanish text of each item, so it is kept even if units are renamed,
+reordered or moved. If the file can't be read, the app says why (Settings → Course) and shows the old word decks.
+
+## Practice buttons
 
 | Button | What it does |
 |---|---|
-| 🔊 Listen | Correct pronunciation (Spain voice, slightly slow) |
+| 🔊 Listen | Correct pronunciation |
 | 🐢 Slower | Same, much slower |
 | 🎤 Record | Say the phrase. It stops by itself when you finish (or tap ⏹ Stop) |
 | 👂 Hear myself | Plays back your last recording |
 | Next ➡ | Next item |
 
-You get an **overall** score plus **accuracy**, **fluency** and **completeness**. Each word is green (80+),
-orange (60–79) or red (under 60). Weak sounds are underlined and explained in plain language, for example
-*"rodilla: r, rolled r. Roll it: the tip of your tongue vibrates…"*. Tap a word to see the score of each sound.
+Scores: **overall**, **accuracy**, **fluency** and **completeness**. Each word is green (80+), orange (60–79) or
+red (under 60); weak sounds are underlined and explained. Tap a word to see the score of each sound.
 
-**Items come back based on your first try:** under 65 → after a few other items; 65–84 → tomorrow;
-85+ → longer and longer gaps (1, 3, 7, 14, 30 days).
-
-- **Progress**: daily average, your hardest sounds (tap one for a tip), the words to work on, and
-  **Save a backup** / **Restore a backup** (save it to iCloud Drive via "Save to Files").
-- **My words**: add your own words or sentences with English and French, in any deck.
+- **Progress**: daily average, hardest sounds, words to work on, and **Save a backup** / **Restore a backup**.
+- **My words**: add your own words or sentences; they appear on Home under "My words".
 
 ## Getting your Azure key
 
@@ -56,9 +75,12 @@ F0 does not charge: when the limit is reached it simply stops until the next mon
 
 ## Files
 
-- `index.html`, `style.css`, `app.js`: the page
-- `sounds.js`: Spanish sound guide and tips
+- `spanish_course.json`: the course (replace it to update the course)
+- `index.html`, `style.css`, `app.js`: the screens
+- `course.js`: reads the course file (accepts English or Spanish field names)
+- `speech.js`: Azure voice, recording and scoring (with the iPad audio fixes)
+- `sounds.js`: Spanish sound guide, tips and French comparisons (Spain and Mexico)
 - `store.js`: saving on the iPad (results, review schedule, your words, settings)
-- `decks.js`: the built-in decks (76 items)
+- `decks.js`: the original word decks (used to carry over old progress, and as a fallback)
 - `vendor/speech-sdk.min.js`: Microsoft's Speech toolkit for browsers
-- `tests/`: automated checks (`node tests/test_sounds.js`, `node tests/test_store.js`)
+- `tests/`: automated checks (`node tests/test_course.js`, `node tests/test_store.js`, `node tests/test_sounds.js`)
