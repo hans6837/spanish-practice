@@ -213,3 +213,20 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 #practice-end .row { margin-top: 12px; }
 .u-sub { font-size: 15px; color: var(--ink-2); }
 .u-sub.big-sub { font-size: 18px; margin: -4px 0 10px; }
+
+/* ---------- vocabulary ---------- */
+.select { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 17px; }
+.quiz-prompt { font-size: 18px; color: var(--ink-2); margin-bottom: 10px; }
+.quiz-card .es { min-height: 1.2em; }
+.buttons.three { grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 760px) { .buttons.three { grid-template-columns: 1fr 1fr; } .buttons.three .record { grid-column: span 2; } }
+#quiz-level { margin-top: 12px; }
+#quiz-level-bar { height: 100%; width: 0; background: var(--record); transition: width .06s; }
+.verdict { font-size: 30px; font-weight: 800; margin-bottom: 6px; }
+.verdict.good { color: var(--good); } .verdict.bad { color: var(--bad); }
+.answer-es { font-size: 30px; font-weight: 700; }
+.answer-tr { color: var(--ink-2); font-size: 18px; }
+.heard { margin: 8px 0; font-size: 17px; }
+.quiz-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.quiz-actions .big { padding: 16px 22px; font-size: 20px; }
+.today-row.vocab { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--line); }

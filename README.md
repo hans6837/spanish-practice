@@ -44,6 +44,18 @@ physiotherapy language). Each level has units; each unit has a short lesson, exa
 opens. Your progress is linked to the Spanish text of each item, so it is kept even if units are renamed,
 reordered or moved. If the file can't be read, the app says why (Settings → Course) and shows the old word decks.
 
+## Vocabulary (spoken test)
+
+The **Vocabulary** tab tests the words and phrases you have practised in the course, by voice only:
+
+- **Spanish → English:** you hear the Spanish (the text stays hidden) and say what it means in English.
+- **English → Spanish:** you see and hear the English and say it in Spanish (you also get a pronunciation score).
+- In "Both directions", a word is first tested Spanish → English; once you get it right, English → Spanish is added.
+- Wrong answers come back after a minute (and again before the test ends); right answers come back after
+  10 minutes, then 1, 3, 7, 21 and 60 days. Home shows how many words are due.
+- Answers are checked generously (e.g. "to stretch" = "stretch"; any meaning in "tomorrow; morning" counts).
+  If the recogniser mishears you, tap **I was right**. **I don't know** shows the answer.
+
 ## Practice buttons
 
 | Button | What it does |
@@ -79,8 +91,9 @@ F0 does not charge: when the limit is reached it simply stops until the next mon
 - `index.html`, `style.css`, `app.js`: the screens
 - `course.js`: reads the course file (accepts English or Spanish field names)
 - `speech.js`: Azure voice, recording and scoring (with the iPad audio fixes)
+- `vocab.js`: checks spoken vocabulary answers (English and Spanish)
 - `sounds.js`: Spanish sound guide, tips and French comparisons (Spain and Mexico)
 - `store.js`: saving on the iPad (results, review schedule, your words, settings)
 - `decks.js`: the original word decks (used to carry over old progress, and as a fallback)
 - `vendor/speech-sdk.min.js`: Microsoft's Speech toolkit for browsers
-- `tests/`: automated checks (`node tests/test_course.js`, `node tests/test_store.js`, `node tests/test_sounds.js`)
+- `tests/`: automated checks (`node tests/test_course.js`, `node tests/test_store.js`, `node tests/test_sounds.js`, `node tests/test_vocab.js`)

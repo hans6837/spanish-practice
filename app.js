@@ -105,7 +105,12 @@
     $("today-card").innerHTML = '<div class="eyebrow">Today</div>' +
       '<div class="today-row"><span>New items</span><b>' + newToday + " / " + s.newPerDay + "</b></div>" +
       '<div class="today-row"><span>Reviews due</span><b>' + due + "</b></div>" +
-      (due ? '<button class="mid primary" data-action="review">🔁 Review now (' + due + ")</button>" : '<div class="meta">No reviews due. 👍</div>');
+      (due ? '<button class="mid primary" data-action="review">🔁 Review now (' + due + ")</button>" : '<div class="meta">No reviews due. 👍</div>') +
+      (function () {
+        var vs = store.vocabStats(state.courseKeys, vocabMode()), n = vs.due + vs.fresh;
+        return '<div class="today-row vocab"><span>Vocabulary due</span><b>' + n + "</b></div>" +
+          (n ? '<button class="mid primary" data-go="vocab-start">🧠 Vocabulary test (' + n + ")</button>" : '<div class="meta">' + (vs.pool ? "Vocabulary up to date. 👍" : "Practise a unit to start your vocabulary.") + "</div>");
+      })();
 
     var allSounds = store.weakSounds(SOUND_LABELS);
     var weak = allSounds.filter(function (w) { return w.avg < 85; }).slice(0, 5);
@@ -540,15 +545,155 @@
       .then(function () { state.recording = null; });
   }
 
+  // ------------------------------------------------------------ vocabulary (spoken test)
+  var EN_VOICE = { lang: "en-US", voice: "en-US-JennyNeural" };
+  function vocabMode() { return store.settings().vocabMode || "mixed"; }
+  function renderVocab() {
+    var st = store.vocabStats(state.courseKeys, vocabMode());
+    $("vocab-mode").value = vocabMode();
+    var tiles = [[st.pool, "words in your vocabulary"], [st.due, "due now"], [st.fresh, "not tested yet"],
+                 [st.knownEsEn, "known Spanish → English"], [st.knownEnEs, "known English → Spanish"],
+                 [st.weekAccuracy == null ? "–" : st.weekAccuracy + "%", "right in the last 7 days"]];
+    $("vocab-tiles").innerHTML = tiles.map(function (t) { return '<div class="tile"><div class="v">' + t[0] + '</div><div class="l">' + t[1] + "</div></div>"; }).join("");
+    var empty = !st.pool;
+    $("vocab-empty").innerHTML = "Practise some items in the course first (Home → a unit → Practice). Every word you practise becomes a vocabulary card.";
+    $("vocab-empty").classList.toggle("hidden", !empty);
+    $("btn-start-quiz").classList.toggle("hidden", empty);
+    $("btn-start-quiz").textContent = st.due + st.fresh ? "🧠 Start vocabulary test (" + (st.due + st.fresh) + ")" : "🧠 Extra vocabulary practice";
+    var v = store.data.vocab, weak = Object.keys(v).filter(function (id) { return v[id].wrong > 0 && state.byKey[id.split("|")[1]]; })
+      .sort(function (a, b) { return (v[b].wrong - v[b].right) - (v[a].wrong - v[a].right) || v[a].level - v[b].level; }).slice(0, 8);
+    $("vocab-weak").innerHTML = weak.length ? weak.map(function (id) {
+      var dir = id.split("|")[0], it = state.byKey[id.split("|")[1]].item;
+      return '<div class="list-row"><span><b>' + esc(it.es) + '</b> <span class="meta">' + esc(it.en) + " · " + (dir === "es-en" ? "Spanish → English" : "English → Spanish") +
+        '</span></span><span class="row-end"><span class="pill bad">' + v[id].wrong + " wrong</span> <span class=\"pill good\">" + v[id].right + " right</span></span></div>";
+    }).join("") : '<div class="empty">No difficult words yet.</div>';
+  }
+  function startQuiz() {
+    state.quiz = { mode: vocabMode(), count: 0, right: 0, limit: 20, recent: [], extra: false, retry: [] };
+    showView("quiz");
+    nextCard();
+  }
+  function nextCard() {
+    var q = state.quiz;
+    Speech.stopPlayback();
+    $("quiz-end").classList.add("hidden"); $("quiz-main").classList.remove("hidden");
+    var r = store.chooseVocab(state.courseKeys, q.mode, { exclude: q.recent });
+    if (!r.card && q.extra) {
+      // extra practice: the cards seen longest ago
+      var cards = store.vocabCards(state.courseKeys, q.mode).filter(function (c) { return q.recent.indexOf(c.dir + "|" + c.key) < 0; });
+      cards.sort(function (a, b) { return (store.vocabCard(a.key, a.dir) || { due: 0 }).due - (store.vocabCard(b.key, b.dir) || { due: 0 }).due; });
+      if (cards.length) r = { card: cards[0], why: "extra" };
+    }
+    // Words missed in this test come back before it ends.
+    if ((!r.card || q.count >= q.limit) && q.retry.length) {
+      var again = q.retry[0].split("|");
+      r = { card: { dir: again[0], key: again[1] }, why: "again" };
+    }
+    if (!r.card || (q.count >= q.limit && r.why !== "again")) return endQuiz(!r.card);
+    var c = r.card, entry = state.byKey[c.key], it = entry.item;
+    q.card = c; q.entry = entry; q.answered = false; q.why = r.why;
+    q.recent = q.recent.filter(function (x) { return x !== c.dir + "|" + c.key; }).concat([c.dir + "|" + c.key]).slice(-4);
+    $("quiz-why").textContent = ({ review: "Review", "new": "New word", extra: "Extra practice", again: "Once more (you missed it)" })[r.why] + " · " + (c.dir === "es-en" ? "Spanish → English" : "English → Spanish");
+    $("quiz-session").textContent = (q.count + 1) + " / " + q.limit + " · " + q.right + " right";
+    $("quiz-result").classList.add("hidden");
+    $("quiz-answer").disabled = false; $("quiz-dunno").disabled = false;
+    if (c.dir === "es-en") {
+      $("quiz-prompt").textContent = "🎧 Listen. What does it mean? Say it in English.";
+      $("quiz-text").textContent = it.es; $("quiz-text").classList.add("hidden");
+      $("quiz-show").classList.remove("hidden");
+    } else {
+      $("quiz-prompt").textContent = "🗣️ Say it in Spanish:";
+      $("quiz-text").textContent = it.en; $("quiz-text").classList.remove("hidden");
+      $("quiz-show").classList.add("hidden");
+    }
+    quizStatus("");
+    playPrompt();
+  }
+  function playPrompt() {
+    var q = state.quiz, it = q.entry.item;
+    var p = q.card.dir === "es-en" ? Speech.speak(it.es, false) : Speech.speak(it.en, false, EN_VOICE);
+    p.catch(function (e) {
+      if (q.card.dir === "es-en") { $("quiz-text").classList.remove("hidden"); quizStatus("Could not play the Spanish (" + e.message + "), so it is shown instead.", true); }
+    });
+  }
+  function quizStatus(msg, err) { var el = $("quiz-status"); el.textContent = msg || ""; el.className = "status" + (err ? " error" : ""); }
+  function quizAnswer() {
+    var q = state.quiz;
+    if (!q || q.answered) return;
+    if (state.recording) { state.recording.stop(); return; }
+    Speech.stopPlayback();
+    var c = q.card, it = q.entry.item, btn = $("quiz-answer"), lvl = $("quiz-level"), bar = $("quiz-level-bar");
+    var es2en = c.dir === "es-en";
+    btn.textContent = "⏳ Starting…"; quizStatus("Starting the microphone…");
+    var ctl = Speech.assess(es2en ? it.en : it.es, function () {
+      btn.classList.add("recording"); btn.textContent = "⏹ Stop"; lvl.classList.remove("hidden");
+      quizStatus(es2en ? "Speak now, in English." : "Speak now, in Spanish.");
+    }, function (v) { bar.style.width = Math.round(v * 100) + "%"; }, es2en ? { language: "en-US", noScoring: true } : {});
+    state.recording = ctl;
+    ctl.promise.then(function (res) {
+      if (state.quiz !== q || q.card !== c) return;
+      var best = (res.json.NBest && res.json.NBest[0]) || {};
+      var heard = res.json.DisplayText || best.Display || "";
+      var check = es2en ? Vocab.checkEnglish(it.en, heard) : Vocab.checkSpanish(it.es, heard);
+      var pron = es2en ? null : SpanishSounds.analyse(it.es, res.json);
+      grade(check.ok, heard, check.note || "", pron);
+    }).catch(function (e) {
+      quizStatus(e.message + (e.help ? " " + e.help : "") + " Tap 🎤 Answer to try again.", true);
+    }).then(function () {
+      state.recording = null;
+      btn.classList.remove("recording"); btn.textContent = "🎤 Answer";
+      lvl.classList.add("hidden"); bar.style.width = "0";
+    });
+  }
+  function grade(ok, heard, note, pron) {
+    var q = state.quiz, c = q.card, it = q.entry.item;
+    q.answered = true; q.count++; if (ok) q.right++;
+    q.before = store.vocabCard(c.key, c.dir) ? JSON.parse(JSON.stringify(store.vocabCard(c.key, c.dir))) : null;
+    var saved = store.recordVocab(c.key, c.dir, ok);
+    var cid = c.dir + "|" + c.key;
+    q.retry = q.retry.filter(function (x) { return x !== cid; });
+    if (!ok) q.retry.push(cid);
+    $("quiz-answer").disabled = true; $("quiz-dunno").disabled = true;
+    $("quiz-text").classList.remove("hidden"); $("quiz-show").classList.add("hidden");
+    var html = '<div class="verdict ' + (ok ? "good" : "bad") + '">' + (ok ? "✓ Right!" : heard == null ? "The answer is:" : "✗ Not quite") + "</div>";
+    if (heard != null) html += '<div class="heard">You said: <b>“' + esc(heard || "…") + '”</b></div>';
+    if (note) html += '<div class="tip">' + esc(note) + "</div>";
+    html += '<div class="answer-es">' + esc(it.es) + '</div><div class="answer-tr"><span class="flag">EN</span> ' + esc(it.en) +
+      (it.fr ? ' &nbsp; <span class="flag">FR</span> ' + esc(it.fr) : "") + "</div>";
+    if (pron) html += '<div class="heard">Pronunciation: <b class="num ' + colour(pron.overall) + '">' + pron.overall + "</b> " +
+      pron.words.map(function (w) { return '<span class="pill ' + w.colour + '">' + esc(w.text) + " " + w.score + "</span>"; }).join(" ") + "</div>";
+    var nextGap = ok ? (saved.card.level <= 1 ? "in about 10 minutes" : "in " + Math.round(Store_gapDays(saved.card)) + " day(s)") : "in about a minute";
+    html += '<div class="meta">This word comes back ' + nextGap + ".</div>";
+    html += '<div class="quiz-actions"><button class="big next" id="quiz-next">Next ➡</button>' +
+      (!ok && heard ? '<button class="mid" id="quiz-override">I was right (it misheard me)</button>' : "") +
+      '<button class="mid" id="quiz-replay">🔊 Hear the Spanish</button></div>';
+    $("quiz-result").innerHTML = html;
+    $("quiz-result").classList.remove("hidden");
+    $("quiz-session").textContent = q.count + " / " + q.limit + " · " + q.right + " right";
+    quizStatus(saved.saved ? "" : "Warning: your answer could not be saved (iPad storage full or blocked).", !saved.saved);
+    Speech.speak(it.es, false).catch(function () {});
+  }
+  function Store_gapDays(card) { return Math.max(1, (card.due - card.last) / 86400000); }
+  function endQuiz(nothingLeft) {
+    var q = state.quiz;
+    var html = "<h3>" + (nothingLeft ? "All vocabulary done for now ✅" : "Test finished ✅") + "</h3>" +
+      "<p><b>" + q.right + " of " + q.count + "</b> right.</p>" +
+      (nothingLeft ? "<p>Nothing else is due. Words come back on their own schedule; practise more course items to add new words.</p>" : "") +
+      '<div class="row"><button class="mid primary" id="quiz-more">' + (nothingLeft ? "Extra practice anyway" : "20 more") + '</button><button class="mid" data-go="home">Home</button></div>';
+    $("quiz-end").innerHTML = html;
+    $("quiz-end").classList.remove("hidden"); $("quiz-main").classList.add("hidden");
+  }
+
   // ------------------------------------------------------------ navigation & events
   function showView(name) {
     if (state.recording && name !== "practice") { state.recording.stop(); }
     each(".tab", function (t) {
-      var tabFor = { unit: "home", practice: "home" }[name] || name;
+      var tabFor = { unit: "home", practice: "home", quiz: "vocab" }[name] || name;
       t.classList.toggle("active", t.dataset.view === tabFor);
     });
     each(".view", function (v) { v.classList.toggle("active", v.id === "view-" + name); });
     if (name === "home") renderHome();
+    if (name === "vocab") renderVocab();
     if (name === "progress") loadProgress();
     if (name === "words") loadWordList();
     if (name === "setup") renderSettings();
@@ -570,6 +715,12 @@
   });
   $("btn-next").addEventListener("click", function () { if (!state.recording) nextInSession(); });
   $("btn-reveal").addEventListener("click", function () { reveal(true); });
+  $("btn-start-quiz").addEventListener("click", function () { Speech.audio(); startQuiz(); });
+  $("vocab-mode").addEventListener("change", function (e) { store.data.settings.vocabMode = e.target.value; store.save(); renderVocab(); });
+  $("quiz-hear").addEventListener("click", function () { if (!state.recording) playPrompt(); });
+  $("quiz-answer").addEventListener("click", quizAnswer);
+  $("quiz-dunno").addEventListener("click", function () { var q = state.quiz; if (q && !q.answered && !state.recording) grade(false, null, "", null); });
+  $("quiz-show").addEventListener("click", function () { $("quiz-text").classList.remove("hidden"); $("quiz-show").classList.add("hidden"); });
   $("btn-start-practice").addEventListener("click", function () {
     var u = state.unit;
     startSession({ type: "unit", unit: u, keys: u.items.map(function (i) { return i.key; }) });
@@ -583,7 +734,25 @@
     if (!t) return;
     var el;
     if ((el = t.closest("[data-unit]"))) { Speech.audio(); openUnit(el.dataset.unit); return; }
-    if ((el = t.closest("[data-go]"))) { showView(el.dataset.go); return; }
+    if ((el = t.closest("[data-go]"))) {
+      if (state.recording) state.recording.stop();
+      Speech.stopPlayback();
+      if (el.dataset.go === "vocab-start") { Speech.audio(); startQuiz(); } else showView(el.dataset.go);
+      return;
+    }
+    if (t.id === "quiz-next") { nextCard(); return; }
+    if (t.id === "quiz-replay") { Speech.speak(state.quiz.entry.item.es, false).catch(function () {}); return; }
+    if (t.id === "quiz-more") { state.quiz.count = 0; state.quiz.right = 0; state.quiz.extra = true; nextCard(); return; }
+    if (t.id === "quiz-override") {
+      var q = state.quiz;
+      store.correctLastVocab(q.card.key, q.card.dir, q.before);
+      q.retry = q.retry.filter(function (x) { return x !== q.card.dir + "|" + q.card.key; });
+      q.right++;
+      $("quiz-session").textContent = q.count + " / " + q.limit + " · " + q.right + " right";
+      el = t.closest(".result").querySelector(".verdict"); el.textContent = "✓ Counted as right"; el.className = "verdict good";
+      t.remove();
+      return;
+    }
     if ((el = t.closest("[data-say]"))) { sayExample(+el.dataset.say, !!el.dataset.slow); return; }
     if ((el = t.closest("[data-sound]"))) { soundDrill(el.dataset.sound); return; }
     if ((el = t.closest("[data-action=review]"))) { startSession({ type: "review", keys: state.courseKeys.slice(), label: "Review" }); return; }

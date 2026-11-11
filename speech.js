@@ -133,9 +133,12 @@
   }
 
   // Listen: Azure's voice for the chosen accent. The audio is kept in memory so replays are free.
-  function speak(text, slow) {
+  // opts.lang + opts.voice: speak in another language (e.g. an English prompt).
+  function speak(text, slow, opts) {
+    opts = opts || {};
     var ctx = audio();
-    var s = store.settings(), rate = slow ? "-40%" : (s.speed || "-15%"), voice = voiceFor();
+    var s = store.settings(), rate = slow ? "-40%" : (opts.lang ? "0%" : (s.speed || "-15%"));
+    var voice = opts.voice || voiceFor(), lang = opts.lang || accent();
     var cacheKey = voice + "|" + rate + "|" + text;
     if (state.audioCache[cacheKey]) return playAudioData(state.audioCache[cacheKey], "audio/mpeg");
     return new Promise(function (resolve, reject) {
@@ -143,7 +146,7 @@
       try { cfg = speechConfig(); } catch (e) { return reject(e); }
       cfg.speechSynthesisOutputFormat = SDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
       var synth = new SDK.SpeechSynthesizer(cfg, null);
-      var ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="' + accent() + '">' +
+      var ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="' + lang + '">' +
         '<voice name="' + esc(voice) + '"><prosody rate="' + esc(rate) + '">' + esc(text) + "</prosody></voice></speak>";
       synth.speakSsmlAsync(ssml, function (result) {
         synth.close();
@@ -202,7 +205,10 @@
    * Record and score. Returns a controller {promise, stop()}.
    * onLevel(0..1) is called while listening, onListening() once the mic is on.
    */
-  function assess(referenceText, onListening, onLevel) {
+  // opts.language: listen for another language (e.g. "en-US");
+  // opts.noScoring: just recognise what was said, without pronunciation scoring.
+  function assess(referenceText, onListening, onLevel, opts) {
+    opts = opts || {};
     var ctx = audio(); // must run inside the tap
     var stopped = false, cleanup = function () {}, pushStream = null;
     var ctl = { stop: function () { if (!stopped) { stopped = true; if (pushStream) pushStream.close(); } } };
@@ -243,9 +249,10 @@
 
         cfg.setProperty(SDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "8000");
         cfg.setProperty(SDK.PropertyId.Speech_SegmentationSilenceTimeoutMs, "1300");
+        if (opts.language) cfg.speechRecognitionLanguage = opts.language;
         var level = scoringLevel();
         var rec = new SDK.SpeechRecognizer(cfg, SDK.AudioConfig.fromStreamInput(pushStream));
-        scoringConfig(referenceText, level).applyTo(rec);
+        if (!opts.noScoring) scoringConfig(referenceText, level).applyTo(rec);
         var safety = setTimeout(ctl.stop, 20000); // never record forever
         if (onListening) onListening();
         rec.recognizeOnceAsync(function (result) {
@@ -259,7 +266,7 @@
 
         function handleResult(result, lvl, recording) {
           if (result.reason === SDK.ResultReason.RecognizedSpeech) {
-            rememberScoringLevel(lvl);
+            if (!opts.noScoring) rememberScoringLevel(lvl);
             resolve({ json: JSON.parse(result.properties.getProperty(SDK.PropertyId.SpeechServiceResponse_JsonResult)), recording: recording });
           } else if (result.reason === SDK.ResultReason.NoMatch) {
             reject(new Error("I didn't hear any Spanish. Tap Record, then speak clearly towards the iPad."));
@@ -271,7 +278,7 @@
         // validate speech context", websocket 1007). Then score the SAME
         // recording again with simpler settings — no need to speak twice.
         function failed(details, lvl, recording) {
-          if (/1007|1011|speech context|internal (server )?error/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
+          if (!opts.noScoring && /1007|1011|speech context|internal (server )?error/i.test(String(details)) && lvl < SCORING_LEVELS.length - 1 && chunks.length) {
             var next = lvl + 1; // remembered only once it actually works (handleResult)
             var replay = SDK.AudioInputStream.createPushStream(SDK.AudioStreamFormat.getWaveFormatPCM(RATE, 16, 1));
             chunks.forEach(function (c) { replay.write(c.buffer.slice(0)); });

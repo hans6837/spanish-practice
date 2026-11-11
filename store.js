@@ -17,6 +17,9 @@
   var GOOD = 80;          // a score of 80+ counts as a "good day" for the item
   var GOOD_DAYS = 2;      // an item is learned after good scores on 2 different days
   var UNIT_LEARNED = 0.8; // a unit is learned when 80% of its items are learned
+  // Vocabulary cards: wrong -> back in 1 minute; right -> 10 min, 1, 3, 7, 21, 60 days.
+  var VOCAB_INTERVALS = [1 * MINUTE, 10 * MINUTE, 1 * DAY, 3 * DAY, 7 * DAY, 21 * DAY, 60 * DAY];
+  var VOCAB_KNOWN = 3;    // a card is "known" once it has passed a review after at least a day
 
   var itemKey = (root.Course && root.Course.itemKey) || function (es) {
     return String(es || "").normalize("NFC").toLowerCase().replace(/[¿?¡!.,;:"“”«»()\[\]…—–\-\/]/g, " ").replace(/\s+/g, " ").trim();
@@ -25,7 +28,7 @@
   function emptyData() {
     return { version: 2,
              settings: { key: "", region: "", voice: "", speed: "-15%", accent: "es-ES", newPerDay: 10 },
-             myItems: [], items: {}, attempts: [] };
+             myItems: [], items: {}, attempts: [], vocab: {}, vocabLog: [] };
   }
   function dayKey(t) {
     var d = new Date(t);
@@ -83,6 +86,7 @@
         var wasOld = parsed.version !== 2;
         d = migrate(parsed, this.legacy);
         d.settings = Object.assign(emptyData().settings, d.settings || {});
+        d.vocab = d.vocab || {}; d.vocabLog = d.vocabLog || [];
         if (wasOld) {
           try { this.storage.setItem(STORAGE_KEY + ".backup-before-course", raw); } catch (e) {}
           this.data = d; this.save();
@@ -308,6 +312,83 @@
     };
   };
 
+  // ------------------------------------------------------------ vocabulary (spoken answers)
+  /*
+   * Each practised item gives two cards: "es-en" (hear Spanish, say English)
+   * and "en-es" (see English, say Spanish). In "mixed" mode the en-es card
+   * appears once you have answered the es-en card correctly at least once.
+   */
+  Store.prototype.vocabPool = function (keys) {
+    var items = this.data.items;
+    return keys.filter(function (k) { return !!items[k]; });
+  };
+  Store.prototype.vocabCard = function (key, dir) { return this.data.vocab[dir + "|" + key] || null; };
+  Store.prototype.vocabCards = function (keys, mode) {
+    var self = this, out = [];
+    this.vocabPool(keys).forEach(function (k) {
+      if (mode !== "en-es") out.push({ key: k, dir: "es-en" });
+      if (mode === "en-es") out.push({ key: k, dir: "en-es" });
+      else if (mode !== "es-en") {
+        var fwd = self.vocabCard(k, "es-en");
+        if (self.vocabCard(k, "en-es") || (fwd && fwd.right > 0)) out.push({ key: k, dir: "en-es" });
+      }
+    });
+    return out;
+  };
+  /* Next card: due cards first (weakest first), then new cards. */
+  Store.prototype.chooseVocab = function (keys, mode, opts) {
+    opts = opts || {};
+    var self = this, now = opts.now || Date.now(), exclude = opts.exclude || [];
+    var cards = this.vocabCards(keys, mode || "mixed");
+    var id = function (c) { return c.dir + "|" + c.key; };
+    var cands = cards.filter(function (c) { return exclude.indexOf(id(c)) < 0; });
+    if (!cands.length) cands = cards;
+    var v = this.data.vocab;
+    var due = cands.filter(function (c) { return v[id(c)] && v[id(c)].due <= now; });
+    if (due.length) {
+      due.sort(function (a, b) { return (v[id(a)].level - v[id(b)].level) || (v[id(a)].due - v[id(b)].due); });
+      return { card: due[0], why: "review" };
+    }
+    var fresh = cands.filter(function (c) { return !v[id(c)]; });
+    if (fresh.length) {
+      fresh.sort(function (a, b) { return (a.dir === "es-en" ? 0 : 1) - (b.dir === "es-en" ? 0 : 1); });
+      return { card: fresh[0], why: "new" };
+    }
+    return { card: null, why: "done" };
+  };
+  Store.prototype.recordVocab = function (key, dir, ok, now) {
+    now = now || Date.now();
+    var id = dir + "|" + key;
+    var c = this.data.vocab[id] || { level: 0, seen: 0, right: 0, wrong: 0 };
+    c.level = ok ? Math.min((c.seen ? c.level : 0) + 1, VOCAB_INTERVALS.length - 1) : 0;
+    c.seen++; if (ok) c.right++; else c.wrong++;
+    c.last = now; c.due = now + VOCAB_INTERVALS[ok ? c.level : 0];
+    this.data.vocab[id] = c;
+    this.data.vocabLog.push({ t: now, k: key, d: dir, ok: ok ? 1 : 0 });
+    if (this.data.vocabLog.length > 5000) this.data.vocabLog = this.data.vocabLog.slice(-5000);
+    var saved = this.save();
+    return { card: c, saved: saved };
+  };
+  /* Undo the last answer and record it again as right (when the recogniser misheard). */
+  Store.prototype.correctLastVocab = function (key, dir, before, now) {
+    var id = dir + "|" + key, log = this.data.vocabLog;
+    if (before) this.data.vocab[id] = before; else delete this.data.vocab[id];
+    for (var i = log.length - 1; i >= 0; i--) if (log[i].k === key && log[i].d === dir) { log.splice(i, 1); break; }
+    return this.recordVocab(key, dir, true, now);
+  };
+  Store.prototype.vocabStats = function (keys, mode, now) {
+    now = now || Date.now();
+    var self = this, v = this.data.vocab, pool = this.vocabPool(keys);
+    var cards = this.vocabCards(keys, mode || "mixed");
+    var due = 0, fresh = 0;
+    cards.forEach(function (c) { var e = v[c.dir + "|" + c.key]; if (!e) fresh++; else if (e.due <= now) due++; });
+    var known = function (dir) { return pool.filter(function (k) { var e = self.vocabCard(k, dir); return e && e.level >= VOCAB_KNOWN; }).length; };
+    var week = this.data.vocabLog.filter(function (l) { return l.t > now - 7 * DAY; });
+    var right = week.filter(function (l) { return l.ok; }).length;
+    return { pool: pool.length, due: due, fresh: fresh, knownEsEn: known("es-en"), knownEnEs: known("en-es"),
+             week: week.length, weekAccuracy: week.length ? Math.round(right / week.length * 100) : null };
+  };
+
   // ------------------------------------------------------------ backup
   Store.prototype.exportJSON = function (includeKey) {
     var copy = JSON.parse(JSON.stringify(this.data));
@@ -331,6 +412,7 @@
 
   Store.STORAGE_KEY = STORAGE_KEY;
   Store.INTERVALS = INTERVALS;
+  Store.VOCAB_INTERVALS = VOCAB_INTERVALS;
   Store.dayKey = dayKey;
   Store.itemKey = itemKey;
   if (typeof module !== "undefined" && module.exports) module.exports = Store;
