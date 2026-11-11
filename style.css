@@ -211,3 +211,5 @@ button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .sf-head { margin-bottom: 4px; }
 #practice-end h3 { margin-top: 0; }
 #practice-end .row { margin-top: 12px; }
+.u-sub { font-size: 15px; color: var(--ink-2); }
+.u-sub.big-sub { font-size: 18px; margin: -4px 0 10px; }

@@ -1,0 +1,2330 @@
+{
+  "title": "Tarjetas de Español — course",
+  "version": 2,
+  "levels": [
+    {
+      "id": "L1",
+      "number": 1,
+      "name": "Los sonidos",
+      "english": "Sounds",
+      "cefr": "Pre-A1",
+      "units": [
+        {
+          "id": "L1U1",
+          "name": "Las cinco vocales",
+          "english": "The five vowels",
+          "lesson": [
+            "Spanish has only five vowel sounds, and each one always sounds the same. Keep them short and clean, with no glide at the end.",
+            "For a French speaker: a as in patte, e between é and è, i as in ici, o as in mot, u as in ou.",
+            "Every vowel is pronounced, even at the end of a word: mesa is me-sa, never mez."
+          ],
+          "examples": [
+            "a, e, i, o, u",
+            "casa",
+            "mesa",
+            "todo",
+            "uno"
+          ],
+          "items": [
+            {
+              "spanish": "casa",
+              "english": "house",
+              "french": "la maison",
+              "tip": "CA-sa: two clear a's"
+            },
+            {
+              "spanish": "mesa",
+              "english": "table",
+              "french": "la table",
+              "tip": "ME-sa: say the final a"
+            },
+            {
+              "spanish": "sí",
+              "english": "yes",
+              "french": "oui",
+              "tip": "short, clean i"
+            },
+            {
+              "spanish": "oso",
+              "english": "bear",
+              "french": "l'ours",
+              "tip": "O-so: no 'ow' glide like English"
+            },
+            {
+              "spanish": "uno",
+              "english": "one",
+              "french": "un",
+              "tip": "u sounds like French ou"
+            },
+            {
+              "spanish": "agua",
+              "english": "water",
+              "french": "l'eau",
+              "tip": "A-gua: the u slides into the a, like ou-a"
+            },
+            {
+              "spanish": "bueno",
+              "english": "good",
+              "french": "bon",
+              "tip": "BWE-no"
+            },
+            {
+              "spanish": "la idea",
+              "english": "idea",
+              "french": "l'idée",
+              "tip": "i-DE-a: three syllables"
+            },
+            {
+              "spanish": "nueve",
+              "english": "nine",
+              "french": "neuf",
+              "tip": "NWE-be"
+            },
+            {
+              "spanish": "seis",
+              "english": "six",
+              "french": "six",
+              "tip": "one syllable, like English 'case'"
+            },
+            {
+              "spanish": "el aire",
+              "english": "air",
+              "french": "l'air",
+              "tip": "AI-re"
+            },
+            {
+              "spanish": "Europa",
+              "english": "Europe",
+              "french": "l'Europe",
+              "tip": "eu-RO-pa: hear both e and u"
+            }
+          ]
+        },
+        {
+          "id": "L1U2",
+          "name": "Letras que cambian",
+          "english": "Letters that sound different",
+          "lesson": [
+            "h is always silent: hola sounds like ola.",
+            "j, and g before e or i, is a rough sound from the back of the throat, like a strong h or the ch in Bach.",
+            "ll and y sound like the y in yes. ñ is the gn of montagne.",
+            "qu sounds like k, and gu before e or i is a hard g. The u is silent.",
+            "c before e or i, and z: in Spain it's the th of English think; in Latin America it's an s."
+          ],
+          "examples": [
+            "hola",
+            "jamón",
+            "gente",
+            "llamar",
+            "niño",
+            "queso",
+            "cero"
+          ],
+          "items": [
+            {
+              "spanish": "hola",
+              "english": "hello",
+              "french": "bonjour",
+              "tip": "O-la: the h is silent"
+            },
+            {
+              "spanish": "el hielo",
+              "english": "ice",
+              "french": "la glace",
+              "tip": "YE-lo: h silent, hie sounds like ye"
+            },
+            {
+              "spanish": "el jamón",
+              "english": "ham",
+              "french": "le jambon",
+              "tip": "ha-MÓN: throaty j"
+            },
+            {
+              "spanish": "la gente",
+              "english": "people",
+              "french": "les gens",
+              "tip": "HEN-te: g before e is throaty"
+            },
+            {
+              "spanish": "el ejercicio",
+              "english": "exercise",
+              "french": "l'exercice",
+              "tip": "e-her-THI-thio (Spain) / e-her-SI-sio (Latin America)"
+            },
+            {
+              "spanish": "llamar",
+              "english": "to call",
+              "french": "appeler",
+              "tip": "ya-MAR"
+            },
+            {
+              "spanish": "yo",
+              "english": "I",
+              "french": "je",
+              "tip": "like English 'yo'"
+            },
+            {
+              "spanish": "el niño",
+              "english": "child",
+              "french": "l'enfant",
+              "tip": "NI-ño: ñ = gn of montagne"
+            },
+            {
+              "spanish": "mañana",
+              "english": "tomorrow; morning",
+              "french": "demain ; le matin",
+              "tip": "ma-ÑA-na"
+            },
+            {
+              "spanish": "España",
+              "english": "Spain",
+              "french": "l'Espagne",
+              "tip": "es-PA-ña"
+            },
+            {
+              "spanish": "el queso",
+              "english": "cheese",
+              "french": "le fromage",
+              "tip": "KE-so: u silent"
+            },
+            {
+              "spanish": "la guitarra",
+              "english": "guitar",
+              "french": "la guitare",
+              "tip": "gi-TA-rra: u silent, rolled rr"
+            },
+            {
+              "spanish": "cero",
+              "english": "zero",
+              "french": "zéro",
+              "tip": "THE-ro (Spain) / SE-ro"
+            },
+            {
+              "spanish": "el zapato",
+              "english": "shoe",
+              "french": "la chaussure",
+              "tip": "tha-PA-to (Spain) / sa-PA-to"
+            },
+            {
+              "spanish": "el corazón",
+              "english": "heart",
+              "french": "le cœur",
+              "tip": "co-ra-THÓN / co-ra-SÓN"
+            }
+          ]
+        },
+        {
+          "id": "L1U3",
+          "name": "La r y la rr",
+          "english": "The tapped r and rolled rr",
+          "lesson": [
+            "A single r between vowels is one quick tap of the tongue tip, like the tt in American 'butter'.",
+            "rr, and an r at the start of a word, is rolled: several fast taps.",
+            "Keep the r at the front of the mouth. The French throat r is the most common trap for French speakers.",
+            "Changing r to rr changes the word: pero means but, perro means dog."
+          ],
+          "examples": [
+            "pero",
+            "perro",
+            "caro",
+            "carro",
+            "arriba"
+          ],
+          "items": [
+            {
+              "spanish": "pero",
+              "english": "but",
+              "french": "mais",
+              "tip": "PE-ro: one tap"
+            },
+            {
+              "spanish": "el perro",
+              "english": "dog",
+              "french": "le chien",
+              "tip": "PE-rro: rolled"
+            },
+            {
+              "spanish": "caro",
+              "english": "expensive",
+              "french": "cher",
+              "tip": "one tap"
+            },
+            {
+              "spanish": "el carro",
+              "english": "cart; car (Latin America)",
+              "french": "le chariot ; l'auto",
+              "tip": "rolled rr"
+            },
+            {
+              "spanish": "rápido",
+              "english": "fast",
+              "french": "rapide",
+              "tip": "RRÁ-pi-do: an r at the start is rolled"
+            },
+            {
+              "spanish": "arriba",
+              "english": "up, above",
+              "french": "en haut",
+              "tip": "a-RRI-ba: rolled"
+            },
+            {
+              "spanish": "tres",
+              "english": "three",
+              "french": "trois",
+              "tip": "one tap right after the t"
+            },
+            {
+              "spanish": "otro",
+              "english": "other",
+              "french": "autre",
+              "tip": "O-tro: one tap"
+            },
+            {
+              "spanish": "correr",
+              "english": "to run",
+              "french": "courir",
+              "tip": "co-RRER: rolled, then a tap at the end"
+            },
+            {
+              "spanish": "la derecha",
+              "english": "right (side)",
+              "french": "la droite",
+              "tip": "de-RE-cha: one tap"
+            },
+            {
+              "spanish": "la radiografía",
+              "english": "X-ray",
+              "french": "la radiographie",
+              "tip": "rra-dio-gra-FÍ-a: rolled at the start"
+            },
+            {
+              "spanish": "el dolor",
+              "english": "pain",
+              "french": "la douleur",
+              "tip": "do-LOR: light tongue tap at the end, not a French r"
+            }
+          ]
+        },
+        {
+          "id": "L1U4",
+          "name": "b, v y la d suave",
+          "english": "b, v and the soft d",
+          "lesson": [
+            "b and v are the same sound in Spanish. Never use the French v.",
+            "At the start of a phrase or after m or n, it's a full b. Between vowels it softens: the lips almost touch.",
+            "d between vowels or at the end of a word is soft, close to the th in English 'the'. At the very end it almost disappears."
+          ],
+          "examples": [
+            "vamos",
+            "beber",
+            "nada",
+            "usted"
+          ],
+          "items": [
+            {
+              "spanish": "vamos",
+              "english": "let's go",
+              "french": "allons-y",
+              "tip": "BA-mos: v sounds like b"
+            },
+            {
+              "spanish": "el vaso",
+              "english": "glass",
+              "french": "le verre",
+              "tip": "BA-so"
+            },
+            {
+              "spanish": "beber",
+              "english": "to drink",
+              "french": "boire",
+              "tip": "first b full, second b soft"
+            },
+            {
+              "spanish": "vivir",
+              "english": "to live",
+              "french": "vivre",
+              "tip": "bi-BIR: no French v"
+            },
+            {
+              "spanish": "nada",
+              "english": "nothing",
+              "french": "rien",
+              "tip": "NA-da: soft d"
+            },
+            {
+              "spanish": "el lado",
+              "english": "side",
+              "french": "le côté",
+              "tip": "LA-do: soft d"
+            },
+            {
+              "spanish": "cada",
+              "english": "each",
+              "french": "chaque",
+              "tip": "CA-da"
+            },
+            {
+              "spanish": "todo",
+              "english": "everything, all",
+              "french": "tout",
+              "tip": "TO-do"
+            },
+            {
+              "spanish": "la salud",
+              "english": "health",
+              "french": "la santé",
+              "tip": "sa-LUD: the final d nearly disappears"
+            },
+            {
+              "spanish": "usted",
+              "english": "you (formal)",
+              "french": "vous",
+              "tip": "us-TED: soft final d"
+            },
+            {
+              "spanish": "la verdad",
+              "english": "truth",
+              "french": "la vérité",
+              "tip": "ber-DAD"
+            }
+          ]
+        },
+        {
+          "id": "L1U5",
+          "name": "El acento tónico",
+          "english": "Word stress",
+          "lesson": [
+            "Words ending in a vowel, n or s are stressed on the second-to-last syllable: CA-sa, HA-blan.",
+            "Words ending in any other consonant are stressed on the last syllable: hos-pi-TAL, do-LOR.",
+            "A written accent breaks the rule and shows where the stress goes: MÚS-cu-lo, a-QUÍ.",
+            "French always stresses the end of the word. Spanish stress moves, and putting it in the wrong place can make a word hard to understand."
+          ],
+          "examples": [
+            "casa",
+            "hospital",
+            "músculo",
+            "articulación"
+          ],
+          "items": [
+            {
+              "spanish": "el médico",
+              "english": "doctor",
+              "french": "le médecin",
+              "tip": "MÉ-di-co"
+            },
+            {
+              "spanish": "el músculo",
+              "english": "muscle",
+              "french": "le muscle",
+              "tip": "MÚS-cu-lo"
+            },
+            {
+              "spanish": "el teléfono",
+              "english": "telephone",
+              "french": "le téléphone",
+              "tip": "te-LÉ-fo-no"
+            },
+            {
+              "spanish": "el hospital",
+              "english": "hospital",
+              "french": "l'hôpital",
+              "tip": "os-pi-TAL: ends in l, so stress at the end"
+            },
+            {
+              "spanish": "la clínica",
+              "english": "clinic",
+              "french": "la clinique",
+              "tip": "CLÍ-ni-ca"
+            },
+            {
+              "spanish": "la articulación",
+              "english": "joint",
+              "french": "l'articulation",
+              "tip": "ar-ti-cu-la-CIÓN"
+            },
+            {
+              "spanish": "también",
+              "english": "also",
+              "french": "aussi",
+              "tip": "tam-BIÉN"
+            },
+            {
+              "spanish": "aquí",
+              "english": "here",
+              "french": "ici",
+              "tip": "a-QUÍ"
+            },
+            {
+              "spanish": "fácil",
+              "english": "easy",
+              "french": "facile",
+              "tip": "FÁ-cil"
+            },
+            {
+              "spanish": "la rehabilitación",
+              "english": "rehabilitation",
+              "french": "la réadaptation",
+              "tip": "re-a-bi-li-ta-CIÓN: h silent"
+            },
+            {
+              "spanish": "el fisioterapeuta",
+              "english": "physiotherapist",
+              "french": "le physiothérapeute",
+              "tip": "fi-sio-te-ra-PEU-ta"
+            },
+            {
+              "spanish": "el cuerpo",
+              "english": "body",
+              "french": "le corps",
+              "tip": "CUER-po"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L2",
+      "number": 2,
+      "name": "Primeros pasos",
+      "english": "First steps",
+      "cefr": "A1",
+      "units": [
+        {
+          "id": "L2U1",
+          "name": "Saludos y cortesía",
+          "english": "Greetings and courtesy",
+          "lesson": [
+            "Use usted with patients and people you don't know. It works like vous. Use tú with friends and family, like tu.",
+            "With usted, the verb takes the same form as for él / ella: ¿Cómo está usted?",
+            "Buenos días until about noon, buenas tardes until dark, buenas noches in the evening."
+          ],
+          "examples": [
+            "Buenos días.",
+            "¿Cómo está usted?",
+            "Mucho gusto."
+          ],
+          "items": [
+            {
+              "spanish": "buenos días",
+              "english": "good morning",
+              "french": "bonjour (le matin)",
+              "tip": ""
+            },
+            {
+              "spanish": "buenas tardes",
+              "english": "good afternoon",
+              "french": "bon après-midi",
+              "tip": ""
+            },
+            {
+              "spanish": "buenas noches",
+              "english": "good evening, good night",
+              "french": "bonsoir, bonne nuit",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo está usted?",
+              "english": "How are you? (formal)",
+              "french": "Comment allez-vous ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Muy bien, gracias.",
+              "english": "Very well, thank you.",
+              "french": "Très bien, merci.",
+              "tip": ""
+            },
+            {
+              "spanish": "por favor",
+              "english": "please",
+              "french": "s'il vous plaît",
+              "tip": ""
+            },
+            {
+              "spanish": "gracias",
+              "english": "thank you",
+              "french": "merci",
+              "tip": ""
+            },
+            {
+              "spanish": "De nada.",
+              "english": "You're welcome.",
+              "french": "De rien.",
+              "tip": ""
+            },
+            {
+              "spanish": "perdón",
+              "english": "sorry, excuse me",
+              "french": "pardon",
+              "tip": ""
+            },
+            {
+              "spanish": "Mucho gusto.",
+              "english": "Nice to meet you.",
+              "french": "Enchanté.",
+              "tip": ""
+            },
+            {
+              "spanish": "Hasta luego.",
+              "english": "See you later.",
+              "french": "À plus tard.",
+              "tip": ""
+            },
+            {
+              "spanish": "adiós",
+              "english": "goodbye",
+              "french": "au revoir",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L2U2",
+          "name": "Presentarse",
+          "english": "Introducing yourself",
+          "lesson": [
+            "Me llamo literally means I call myself. Soy comes from ser, used for who you are and your job.",
+            "Learn the survival phrases early. They keep a conversation going when you get lost."
+          ],
+          "examples": [
+            "Me llamo Hans.",
+            "No entiendo.",
+            "Más despacio, por favor."
+          ],
+          "items": [
+            {
+              "spanish": "Me llamo Hans.",
+              "english": "My name is Hans.",
+              "french": "Je m'appelle Hans.",
+              "tip": ""
+            },
+            {
+              "spanish": "Soy fisioterapeuta.",
+              "english": "I'm a physiotherapist.",
+              "french": "Je suis physiothérapeute.",
+              "tip": ""
+            },
+            {
+              "spanish": "Trabajo en una clínica.",
+              "english": "I work in a clinic.",
+              "french": "Je travaille dans une clinique.",
+              "tip": ""
+            },
+            {
+              "spanish": "Vivo en Canadá.",
+              "english": "I live in Canada.",
+              "french": "J'habite au Canada.",
+              "tip": ""
+            },
+            {
+              "spanish": "Hablo francés e inglés.",
+              "english": "I speak French and English.",
+              "french": "Je parle français et anglais.",
+              "tip": "y (and) becomes e before a word starting with i"
+            },
+            {
+              "spanish": "Hablo un poco de español.",
+              "english": "I speak a little Spanish.",
+              "french": "Je parle un peu espagnol.",
+              "tip": ""
+            },
+            {
+              "spanish": "No entiendo.",
+              "english": "I don't understand.",
+              "french": "Je ne comprends pas.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Puede repetir, por favor?",
+              "english": "Can you repeat, please?",
+              "french": "Pouvez-vous répéter, s'il vous plaît ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Más despacio, por favor.",
+              "english": "More slowly, please.",
+              "french": "Plus lentement, s'il vous plaît.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo se dice … en español?",
+              "english": "How do you say … in Spanish?",
+              "french": "Comment dit-on … en espagnol ?",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L2U3",
+          "name": "Números y días",
+          "english": "Numbers and days",
+          "lesson": [
+            "1 to 10: uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve, diez.",
+            "Days take el and no capital letter: el lunes = on Monday, los lunes = on Mondays.",
+            "You'll use numbers all day in the clinic: pain scores, repetitions, times."
+          ],
+          "examples": [
+            "uno, dos, tres, cuatro, cinco",
+            "seis, siete, ocho, nueve, diez",
+            "lunes, martes, miércoles, jueves, viernes"
+          ],
+          "items": [
+            {
+              "spanish": "dos",
+              "english": "two",
+              "french": "deux",
+              "tip": ""
+            },
+            {
+              "spanish": "cuatro",
+              "english": "four",
+              "french": "quatre",
+              "tip": ""
+            },
+            {
+              "spanish": "cinco",
+              "english": "five",
+              "french": "cinq",
+              "tip": "THIN-co (Spain) / SIN-co"
+            },
+            {
+              "spanish": "siete",
+              "english": "seven",
+              "french": "sept",
+              "tip": ""
+            },
+            {
+              "spanish": "ocho",
+              "english": "eight",
+              "french": "huit",
+              "tip": ""
+            },
+            {
+              "spanish": "diez",
+              "english": "ten",
+              "french": "dix",
+              "tip": ""
+            },
+            {
+              "spanish": "quince",
+              "english": "fifteen",
+              "french": "quinze",
+              "tip": "KIN-the / KIN-se"
+            },
+            {
+              "spanish": "veinte",
+              "english": "twenty",
+              "french": "vingt",
+              "tip": ""
+            },
+            {
+              "spanish": "el lunes",
+              "english": "Monday",
+              "french": "lundi",
+              "tip": ""
+            },
+            {
+              "spanish": "el martes",
+              "english": "Tuesday",
+              "french": "mardi",
+              "tip": ""
+            },
+            {
+              "spanish": "el miércoles",
+              "english": "Wednesday",
+              "french": "mercredi",
+              "tip": ""
+            },
+            {
+              "spanish": "el jueves",
+              "english": "Thursday",
+              "french": "jeudi",
+              "tip": ""
+            },
+            {
+              "spanish": "el viernes",
+              "english": "Friday",
+              "french": "vendredi",
+              "tip": ""
+            },
+            {
+              "spanish": "el sábado",
+              "english": "Saturday",
+              "french": "samedi",
+              "tip": ""
+            },
+            {
+              "spanish": "el domingo",
+              "english": "Sunday",
+              "french": "dimanche",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L2U4",
+          "name": "Verbos esenciales",
+          "english": "Essential verbs",
+          "lesson": [
+            "Ser is for what something is: identity, job, origin (Soy fisioterapeuta). Estar is for states and places (Estoy cansado, Estoy en la clínica). French uses être for both.",
+            "Doler works like plaire: the thing that hurts is the subject. Me duele la rodilla (one thing), me duelen las rodillas (several).",
+            "Each card shows the infinitive. The tip gives the two forms you'll need most: yo and usted."
+          ],
+          "examples": [
+            "Soy fisioterapeuta.",
+            "Estoy cansado.",
+            "Me duele la rodilla."
+          ],
+          "items": [
+            {
+              "spanish": "ser",
+              "english": "to be (identity, job)",
+              "french": "être",
+              "tip": "yo soy · usted es"
+            },
+            {
+              "spanish": "estar",
+              "english": "to be (state, place)",
+              "french": "être",
+              "tip": "yo estoy · usted está"
+            },
+            {
+              "spanish": "tener",
+              "english": "to have",
+              "french": "avoir",
+              "tip": "yo tengo · usted tiene"
+            },
+            {
+              "spanish": "ir",
+              "english": "to go",
+              "french": "aller",
+              "tip": "yo voy · usted va"
+            },
+            {
+              "spanish": "hacer",
+              "english": "to do, to make",
+              "french": "faire",
+              "tip": "yo hago · usted hace"
+            },
+            {
+              "spanish": "poder",
+              "english": "can, to be able",
+              "french": "pouvoir",
+              "tip": "yo puedo · usted puede"
+            },
+            {
+              "spanish": "querer",
+              "english": "to want",
+              "french": "vouloir",
+              "tip": "yo quiero · usted quiere"
+            },
+            {
+              "spanish": "necesitar",
+              "english": "to need",
+              "french": "avoir besoin de",
+              "tip": "yo necesito · usted necesita"
+            },
+            {
+              "spanish": "hablar",
+              "english": "to speak",
+              "french": "parler",
+              "tip": "yo hablo · usted habla"
+            },
+            {
+              "spanish": "entender",
+              "english": "to understand",
+              "french": "comprendre",
+              "tip": "yo entiendo · usted entiende"
+            },
+            {
+              "spanish": "sentir",
+              "english": "to feel",
+              "french": "sentir, ressentir",
+              "tip": "yo siento · usted siente"
+            },
+            {
+              "spanish": "doler",
+              "english": "to hurt",
+              "french": "faire mal",
+              "tip": "me duele · le duele"
+            }
+          ]
+        },
+        {
+          "id": "L2U5",
+          "name": "Preguntas",
+          "english": "Questions",
+          "lesson": [
+            "Questions open with ¿ and close with ?. Question words always carry a written accent.",
+            "For a yes/no question, keep the sentence and raise your voice at the end: ¿Le duele?"
+          ],
+          "examples": [
+            "¿Dónde?",
+            "¿Cuándo?",
+            "¿Le duele?"
+          ],
+          "items": [
+            {
+              "spanish": "¿Qué?",
+              "english": "What?",
+              "french": "Quoi ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Quién?",
+              "english": "Who?",
+              "french": "Qui ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Dónde?",
+              "english": "Where?",
+              "french": "Où ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cuándo?",
+              "english": "When?",
+              "french": "Quand ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo?",
+              "english": "How?",
+              "french": "Comment ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Por qué?",
+              "english": "Why?",
+              "french": "Pourquoi ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cuánto?",
+              "english": "How much?",
+              "french": "Combien ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cuál?",
+              "english": "Which?",
+              "french": "Lequel ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Le duele?",
+              "english": "Does it hurt?",
+              "french": "Ça vous fait mal ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Qué hora es?",
+              "english": "What time is it?",
+              "french": "Quelle heure est-il ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Dónde está el baño?",
+              "english": "Where is the bathroom?",
+              "french": "Où sont les toilettes ?",
+              "tip": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L3",
+      "number": 3,
+      "name": "El cuerpo y la salud",
+      "english": "Body and health",
+      "cefr": "A2",
+      "units": [
+        {
+          "id": "L3U1",
+          "name": "El cuerpo",
+          "english": "The body",
+          "lesson": [
+            "Learn each body part with its article. The gender doesn't always match French: el hombro but l'épaule.",
+            "Spanish says me duele la mano (the hand hurts me), using the article, not mi."
+          ],
+          "examples": [
+            "la cabeza",
+            "el hombro",
+            "la rodilla",
+            "el tobillo"
+          ],
+          "items": [
+            {
+              "spanish": "la cabeza",
+              "english": "head",
+              "french": "la tête",
+              "tip": ""
+            },
+            {
+              "spanish": "el cuello",
+              "english": "neck",
+              "french": "le cou",
+              "tip": ""
+            },
+            {
+              "spanish": "el hombro",
+              "english": "shoulder",
+              "french": "l'épaule",
+              "tip": ""
+            },
+            {
+              "spanish": "el brazo",
+              "english": "arm",
+              "french": "le bras",
+              "tip": ""
+            },
+            {
+              "spanish": "el codo",
+              "english": "elbow",
+              "french": "le coude",
+              "tip": ""
+            },
+            {
+              "spanish": "la muñeca",
+              "english": "wrist",
+              "french": "le poignet",
+              "tip": ""
+            },
+            {
+              "spanish": "la mano",
+              "english": "hand",
+              "french": "la main",
+              "tip": "feminine despite the -o"
+            },
+            {
+              "spanish": "el dedo",
+              "english": "finger",
+              "french": "le doigt",
+              "tip": ""
+            },
+            {
+              "spanish": "el pecho",
+              "english": "chest",
+              "french": "la poitrine",
+              "tip": ""
+            },
+            {
+              "spanish": "la espalda",
+              "english": "back",
+              "french": "le dos",
+              "tip": ""
+            },
+            {
+              "spanish": "la cadera",
+              "english": "hip",
+              "french": "la hanche",
+              "tip": ""
+            },
+            {
+              "spanish": "la pierna",
+              "english": "leg",
+              "french": "la jambe",
+              "tip": ""
+            },
+            {
+              "spanish": "la rodilla",
+              "english": "knee",
+              "french": "le genou",
+              "tip": ""
+            },
+            {
+              "spanish": "el tobillo",
+              "english": "ankle",
+              "french": "la cheville",
+              "tip": ""
+            },
+            {
+              "spanish": "el pie",
+              "english": "foot",
+              "french": "le pied",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L3U2",
+          "name": "Síntomas",
+          "english": "Symptoms",
+          "lesson": [
+            "Tengo dolor de … is the neutral way to describe pain. Me duele … is more everyday.",
+            "Siento + noun describes sensations: Siento hormigueo en la mano."
+          ],
+          "examples": [
+            "Tengo dolor de cabeza.",
+            "Me duelen las rodillas."
+          ],
+          "items": [
+            {
+              "spanish": "Me duele la espalda.",
+              "english": "My back hurts.",
+              "french": "J'ai mal au dos.",
+              "tip": ""
+            },
+            {
+              "spanish": "Me duelen las rodillas.",
+              "english": "My knees hurt.",
+              "french": "J'ai mal aux genoux.",
+              "tip": ""
+            },
+            {
+              "spanish": "Tengo dolor de cabeza.",
+              "english": "I have a headache.",
+              "french": "J'ai mal à la tête.",
+              "tip": ""
+            },
+            {
+              "spanish": "la hinchazón",
+              "english": "swelling",
+              "french": "l'enflure",
+              "tip": ""
+            },
+            {
+              "spanish": "la rigidez",
+              "english": "stiffness",
+              "french": "la raideur",
+              "tip": ""
+            },
+            {
+              "spanish": "el hormigueo",
+              "english": "tingling",
+              "french": "les fourmillements",
+              "tip": ""
+            },
+            {
+              "spanish": "el entumecimiento",
+              "english": "numbness",
+              "french": "l'engourdissement",
+              "tip": ""
+            },
+            {
+              "spanish": "la debilidad",
+              "english": "weakness",
+              "french": "la faiblesse",
+              "tip": ""
+            },
+            {
+              "spanish": "el mareo",
+              "english": "dizziness",
+              "french": "l'étourdissement",
+              "tip": ""
+            },
+            {
+              "spanish": "el cansancio",
+              "english": "tiredness",
+              "french": "la fatigue",
+              "tip": ""
+            },
+            {
+              "spanish": "Estoy cansado.",
+              "english": "I'm tired.",
+              "french": "Je suis fatigué.",
+              "tip": "a woman says cansada"
+            },
+            {
+              "spanish": "Me siento mejor.",
+              "english": "I feel better.",
+              "french": "Je me sens mieux.",
+              "tip": ""
+            },
+            {
+              "spanish": "Me siento peor.",
+              "english": "I feel worse.",
+              "french": "Je me sens moins bien.",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L3U3",
+          "name": "Movimientos",
+          "english": "Movements",
+          "lesson": [
+            "These verbs are the core of every exercise instruction. Learn the infinitive here; Level 4 turns them into commands for patients.",
+            "Reflexive verbs end in -se: sentarse (to sit down), acostarse (to lie down), like s'asseoir."
+          ],
+          "examples": [
+            "doblar",
+            "estirar",
+            "sentarse",
+            "ponerse de pie"
+          ],
+          "items": [
+            {
+              "spanish": "doblar",
+              "english": "to bend",
+              "french": "plier",
+              "tip": ""
+            },
+            {
+              "spanish": "estirar",
+              "english": "to stretch, straighten",
+              "french": "étirer, allonger",
+              "tip": ""
+            },
+            {
+              "spanish": "levantar",
+              "english": "to raise, lift",
+              "french": "lever, soulever",
+              "tip": ""
+            },
+            {
+              "spanish": "bajar",
+              "english": "to lower",
+              "french": "baisser",
+              "tip": ""
+            },
+            {
+              "spanish": "girar",
+              "english": "to turn",
+              "french": "tourner",
+              "tip": ""
+            },
+            {
+              "spanish": "empujar",
+              "english": "to push",
+              "french": "pousser",
+              "tip": ""
+            },
+            {
+              "spanish": "tirar",
+              "english": "to pull",
+              "french": "tirer",
+              "tip": ""
+            },
+            {
+              "spanish": "caminar",
+              "english": "to walk",
+              "french": "marcher",
+              "tip": ""
+            },
+            {
+              "spanish": "sentarse",
+              "english": "to sit down",
+              "french": "s'asseoir",
+              "tip": ""
+            },
+            {
+              "spanish": "acostarse",
+              "english": "to lie down",
+              "french": "se coucher",
+              "tip": ""
+            },
+            {
+              "spanish": "ponerse de pie",
+              "english": "to stand up",
+              "french": "se lever",
+              "tip": ""
+            },
+            {
+              "spanish": "agacharse",
+              "english": "to squat, crouch",
+              "french": "s'accroupir",
+              "tip": ""
+            },
+            {
+              "spanish": "apoyar",
+              "english": "to put weight on, support",
+              "french": "appuyer",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L3U4",
+          "name": "Contar lo que pasó",
+          "english": "Telling what happened",
+          "lesson": [
+            "Patients describe injuries in the past tense (pretérito): Me caí, me torcí el tobillo.",
+            "Hace + time means ago: hace dos semanas = il y a deux semaines.",
+            "Focus first on understanding these forms. Saying them comes later."
+          ],
+          "examples": [
+            "Me caí.",
+            "Empezó hace dos semanas."
+          ],
+          "items": [
+            {
+              "spanish": "Me caí.",
+              "english": "I fell.",
+              "french": "Je suis tombé.",
+              "tip": ""
+            },
+            {
+              "spanish": "Me torcí el tobillo.",
+              "english": "I twisted my ankle.",
+              "french": "Je me suis tordu la cheville.",
+              "tip": ""
+            },
+            {
+              "spanish": "Me hice daño.",
+              "english": "I hurt myself.",
+              "french": "Je me suis fait mal.",
+              "tip": ""
+            },
+            {
+              "spanish": "Empezó hace dos semanas.",
+              "english": "It started two weeks ago.",
+              "french": "Ça a commencé il y a deux semaines.",
+              "tip": ""
+            },
+            {
+              "spanish": "ayer",
+              "english": "yesterday",
+              "french": "hier",
+              "tip": ""
+            },
+            {
+              "spanish": "la semana pasada",
+              "english": "last week",
+              "french": "la semaine dernière",
+              "tip": ""
+            },
+            {
+              "spanish": "hace un mes",
+              "english": "a month ago",
+              "french": "il y a un mois",
+              "tip": ""
+            },
+            {
+              "spanish": "de repente",
+              "english": "suddenly",
+              "french": "soudainement",
+              "tip": ""
+            },
+            {
+              "spanish": "poco a poco",
+              "english": "little by little",
+              "french": "petit à petit",
+              "tip": ""
+            },
+            {
+              "spanish": "Levanté una caja pesada.",
+              "english": "I lifted a heavy box.",
+              "french": "J'ai soulevé une boîte lourde.",
+              "tip": ""
+            },
+            {
+              "spanish": "Me desperté con dolor.",
+              "english": "I woke up in pain.",
+              "french": "Je me suis réveillé avec de la douleur.",
+              "tip": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L4",
+      "number": 4,
+      "name": "En la clínica",
+      "english": "At the clinic",
+      "cefr": "B1",
+      "units": [
+        {
+          "id": "L4U1",
+          "name": "Recepción",
+          "english": "Reception and appointments",
+          "lesson": [
+            "At reception everything uses usted. Siéntese and pase are commands for usted.",
+            "Times: a las tres y media (3:30), a las diez y cuarto (10:15)."
+          ],
+          "examples": [
+            "Pase, por favor.",
+            "¿Tiene cita?"
+          ],
+          "items": [
+            {
+              "spanish": "¿Tiene cita?",
+              "english": "Do you have an appointment?",
+              "french": "Avez-vous un rendez-vous ?",
+              "tip": ""
+            },
+            {
+              "spanish": "la cita",
+              "english": "appointment",
+              "french": "le rendez-vous",
+              "tip": ""
+            },
+            {
+              "spanish": "Pase, por favor.",
+              "english": "Come in, please.",
+              "french": "Entrez, s'il vous plaît.",
+              "tip": ""
+            },
+            {
+              "spanish": "Siéntese, por favor.",
+              "english": "Please sit down.",
+              "french": "Asseyez-vous, s'il vous plaît.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo se llama?",
+              "english": "What's your name?",
+              "french": "Comment vous appelez-vous ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cuál es su fecha de nacimiento?",
+              "english": "What's your date of birth?",
+              "french": "Quelle est votre date de naissance ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Rellene este formulario, por favor.",
+              "english": "Please fill in this form.",
+              "french": "Remplissez ce formulaire, s'il vous plaît.",
+              "tip": ""
+            },
+            {
+              "spanish": "la tarjeta del seguro",
+              "english": "insurance card",
+              "french": "la carte d'assurance",
+              "tip": ""
+            },
+            {
+              "spanish": "Enseguida le atiendo.",
+              "english": "I'll be right with you.",
+              "french": "Je suis à vous dans un instant.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿A qué hora le va bien?",
+              "english": "What time suits you?",
+              "french": "Quelle heure vous convient ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Su próxima cita es el martes.",
+              "english": "Your next appointment is on Tuesday.",
+              "french": "Votre prochain rendez-vous est mardi.",
+              "tip": ""
+            },
+            {
+              "spanish": "a las tres y media",
+              "english": "at half past three",
+              "french": "à trois heures et demie",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L4U2",
+          "name": "La entrevista",
+          "english": "Taking the history",
+          "lesson": [
+            "These questions follow the order of a normal subjective exam. Learn them as whole phrases.",
+            "le means to you (formal): ¿Le duele? = does it hurt you, ¿Qué le pasó? = what happened to you."
+          ],
+          "examples": [
+            "¿Dónde le duele?",
+            "¿Desde cuándo le duele?"
+          ],
+          "items": [
+            {
+              "spanish": "¿Qué le pasó?",
+              "english": "What happened to you?",
+              "french": "Que vous est-il arrivé ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Dónde le duele?",
+              "english": "Where does it hurt?",
+              "french": "Où avez-vous mal ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Desde cuándo le duele?",
+              "english": "How long has it hurt?",
+              "french": "Depuis quand avez-vous mal ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo empezó el dolor?",
+              "english": "How did the pain start?",
+              "french": "Comment la douleur a-t-elle commencé ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Del cero al diez, ¿cuánto le duele?",
+              "english": "From 0 to 10, how much does it hurt?",
+              "french": "De zéro à dix, à quel point avez-vous mal ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿El dolor baja por la pierna?",
+              "english": "Does the pain go down your leg?",
+              "french": "La douleur descend-elle dans la jambe ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Qué empeora el dolor?",
+              "english": "What makes the pain worse?",
+              "french": "Qu'est-ce qui aggrave la douleur ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Qué lo alivia?",
+              "english": "What relieves it?",
+              "french": "Qu'est-ce qui la soulage ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Le duele por la noche?",
+              "english": "Does it hurt at night?",
+              "french": "Avez-vous mal la nuit ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Toma algún medicamento?",
+              "english": "Do you take any medication?",
+              "french": "Prenez-vous des médicaments ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Ha tenido alguna cirugía?",
+              "english": "Have you had any surgery?",
+              "french": "Avez-vous déjà été opéré ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿A qué se dedica?",
+              "english": "What do you do for work?",
+              "french": "Que faites-vous dans la vie ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Hace deporte?",
+              "english": "Do you play sports?",
+              "french": "Faites-vous du sport ?",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L4U3",
+          "name": "Instrucciones del examen",
+          "english": "Exam instructions",
+          "lesson": [
+            "Commands for usted end in -e for -ar verbs (levante, doble) and -a for -er and -ir verbs (haga, mantenga).",
+            "With reflexive verbs the pronoun attaches to the end: siéntese, acuéstese, relájese. That's why they carry an accent."
+          ],
+          "examples": [
+            "Acuéstese boca arriba.",
+            "Doble la rodilla.",
+            "Relájese."
+          ],
+          "items": [
+            {
+              "spanish": "Acuéstese boca arriba.",
+              "english": "Lie on your back.",
+              "french": "Couchez-vous sur le dos.",
+              "tip": ""
+            },
+            {
+              "spanish": "Acuéstese boca abajo.",
+              "english": "Lie on your stomach.",
+              "french": "Couchez-vous sur le ventre.",
+              "tip": ""
+            },
+            {
+              "spanish": "Póngase de lado.",
+              "english": "Turn onto your side.",
+              "french": "Mettez-vous sur le côté.",
+              "tip": ""
+            },
+            {
+              "spanish": "Doble la rodilla.",
+              "english": "Bend your knee.",
+              "french": "Pliez le genou.",
+              "tip": ""
+            },
+            {
+              "spanish": "Estire la pierna.",
+              "english": "Straighten your leg.",
+              "french": "Allongez la jambe.",
+              "tip": ""
+            },
+            {
+              "spanish": "Levante el brazo.",
+              "english": "Raise your arm.",
+              "french": "Levez le bras.",
+              "tip": ""
+            },
+            {
+              "spanish": "Relájese.",
+              "english": "Relax.",
+              "french": "Détendez-vous.",
+              "tip": ""
+            },
+            {
+              "spanish": "Respire hondo.",
+              "english": "Take a deep breath.",
+              "french": "Respirez profondément.",
+              "tip": ""
+            },
+            {
+              "spanish": "Empuje contra mi mano.",
+              "english": "Push against my hand.",
+              "french": "Poussez contre ma main.",
+              "tip": ""
+            },
+            {
+              "spanish": "Avíseme si le duele.",
+              "english": "Tell me if it hurts.",
+              "french": "Dites-moi si ça fait mal.",
+              "tip": ""
+            },
+            {
+              "spanish": "No se mueva.",
+              "english": "Don't move.",
+              "french": "Ne bougez pas.",
+              "tip": ""
+            },
+            {
+              "spanish": "Muy bien, así.",
+              "english": "Very good, like that.",
+              "french": "Très bien, comme ça.",
+              "tip": ""
+            },
+            {
+              "spanish": "Otra vez.",
+              "english": "Once more.",
+              "french": "Encore une fois.",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L4U4",
+          "name": "Ejercicios en casa",
+          "english": "Home exercise program",
+          "lesson": [
+            "Haga (do) and mantenga (hold) come from hacer and mantener. Pare (stop) comes from parar.",
+            "Series = sets, repeticiones = reps, veces = times: dos veces al día."
+          ],
+          "examples": [
+            "Haga tres series de diez repeticiones.",
+            "Si le duele, pare."
+          ],
+          "items": [
+            {
+              "spanish": "Haga tres series de diez repeticiones.",
+              "english": "Do three sets of ten repetitions.",
+              "french": "Faites trois séries de dix répétitions.",
+              "tip": ""
+            },
+            {
+              "spanish": "Mantenga la posición diez segundos.",
+              "english": "Hold the position for ten seconds.",
+              "french": "Maintenez la position dix secondes.",
+              "tip": ""
+            },
+            {
+              "spanish": "dos veces al día",
+              "english": "twice a day",
+              "french": "deux fois par jour",
+              "tip": ""
+            },
+            {
+              "spanish": "todos los días",
+              "english": "every day",
+              "french": "tous les jours",
+              "tip": ""
+            },
+            {
+              "spanish": "Despacio y sin dolor.",
+              "english": "Slowly and without pain.",
+              "french": "Lentement et sans douleur.",
+              "tip": ""
+            },
+            {
+              "spanish": "Si le duele, pare.",
+              "english": "If it hurts, stop.",
+              "french": "Si ça fait mal, arrêtez.",
+              "tip": ""
+            },
+            {
+              "spanish": "el programa de ejercicios",
+              "english": "exercise program",
+              "french": "le programme d'exercices",
+              "tip": ""
+            },
+            {
+              "spanish": "la banda elástica",
+              "english": "resistance band",
+              "french": "la bande élastique",
+              "tip": ""
+            },
+            {
+              "spanish": "Póngase hielo quince minutos.",
+              "english": "Put ice on for fifteen minutes.",
+              "french": "Mettez de la glace quinze minutes.",
+              "tip": ""
+            },
+            {
+              "spanish": "Vuelva dentro de una semana.",
+              "english": "Come back in a week.",
+              "french": "Revenez dans une semaine.",
+              "tip": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L5",
+      "number": 5,
+      "name": "Fisioterapia",
+      "english": "Physiotherapy",
+      "cefr": "B2",
+      "units": [
+        {
+          "id": "L5U1",
+          "name": "Anatomía clínica",
+          "english": "Clinical anatomy",
+          "lesson": [
+            "Most anatomy terms come from Latin, so they're close to French. The traps are the stress and the gender.",
+            "Plurals matter: los isquiotibiales (the hamstrings), los glúteos."
+          ],
+          "examples": [
+            "el tendón",
+            "el cartílago",
+            "el manguito rotador"
+          ],
+          "items": [
+            {
+              "spanish": "el tendón",
+              "english": "tendon",
+              "french": "le tendon",
+              "tip": "ten-DÓN"
+            },
+            {
+              "spanish": "el ligamento",
+              "english": "ligament",
+              "french": "le ligament",
+              "tip": ""
+            },
+            {
+              "spanish": "el cartílago",
+              "english": "cartilage",
+              "french": "le cartilage",
+              "tip": "car-TÍ-la-go"
+            },
+            {
+              "spanish": "el menisco",
+              "english": "meniscus",
+              "french": "le ménisque",
+              "tip": ""
+            },
+            {
+              "spanish": "la columna vertebral",
+              "english": "spine",
+              "french": "la colonne vertébrale",
+              "tip": ""
+            },
+            {
+              "spanish": "la vértebra",
+              "english": "vertebra",
+              "french": "la vertèbre",
+              "tip": "VÉR-te-bra"
+            },
+            {
+              "spanish": "el disco intervertebral",
+              "english": "intervertebral disc",
+              "french": "le disque intervertébral",
+              "tip": ""
+            },
+            {
+              "spanish": "el nervio",
+              "english": "nerve",
+              "french": "le nerf",
+              "tip": ""
+            },
+            {
+              "spanish": "el manguito rotador",
+              "english": "rotator cuff",
+              "french": "la coiffe des rotateurs",
+              "tip": ""
+            },
+            {
+              "spanish": "los isquiotibiales",
+              "english": "hamstrings",
+              "french": "les ischio-jambiers",
+              "tip": ""
+            },
+            {
+              "spanish": "el cuádriceps",
+              "english": "quadriceps",
+              "french": "le quadriceps",
+              "tip": ""
+            },
+            {
+              "spanish": "los glúteos",
+              "english": "glutes",
+              "french": "les fessiers",
+              "tip": ""
+            },
+            {
+              "spanish": "la escápula",
+              "english": "shoulder blade",
+              "french": "l'omoplate",
+              "tip": "also el omóplato"
+            },
+            {
+              "spanish": "la pelvis",
+              "english": "pelvis",
+              "french": "le bassin",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L5U2",
+          "name": "Diagnósticos",
+          "english": "Diagnoses",
+          "lesson": [
+            "Many diagnoses end in -itis (inflammation) or -algia (pain), as in French.",
+            "Patients often use everyday names: codo de tenista instead of epicondilitis, hombro congelado instead of capsulitis adhesiva."
+          ],
+          "examples": [
+            "el esguince de tobillo",
+            "la lumbalgia",
+            "la hernia discal"
+          ],
+          "items": [
+            {
+              "spanish": "el esguince de tobillo",
+              "english": "ankle sprain",
+              "french": "l'entorse de la cheville",
+              "tip": ""
+            },
+            {
+              "spanish": "la tendinitis",
+              "english": "tendinitis",
+              "french": "la tendinite",
+              "tip": ""
+            },
+            {
+              "spanish": "la lumbalgia",
+              "english": "low back pain",
+              "french": "la lombalgie",
+              "tip": ""
+            },
+            {
+              "spanish": "la ciática",
+              "english": "sciatica",
+              "french": "la sciatique",
+              "tip": ""
+            },
+            {
+              "spanish": "la hernia discal",
+              "english": "disc herniation",
+              "french": "la hernie discale",
+              "tip": ""
+            },
+            {
+              "spanish": "la artrosis",
+              "english": "osteoarthritis",
+              "french": "l'arthrose",
+              "tip": ""
+            },
+            {
+              "spanish": "la fractura",
+              "english": "fracture",
+              "french": "la fracture",
+              "tip": ""
+            },
+            {
+              "spanish": "la contractura muscular",
+              "english": "muscle spasm, knot",
+              "french": "la contracture musculaire",
+              "tip": ""
+            },
+            {
+              "spanish": "la rotura de fibras",
+              "english": "muscle tear",
+              "french": "la déchirure musculaire",
+              "tip": ""
+            },
+            {
+              "spanish": "la capsulitis adhesiva",
+              "english": "frozen shoulder",
+              "french": "la capsulite rétractile",
+              "tip": "patients say hombro congelado"
+            },
+            {
+              "spanish": "el latigazo cervical",
+              "english": "whiplash",
+              "french": "le coup du lapin",
+              "tip": ""
+            },
+            {
+              "spanish": "el síndrome del túnel carpiano",
+              "english": "carpal tunnel syndrome",
+              "french": "le syndrome du canal carpien",
+              "tip": ""
+            },
+            {
+              "spanish": "la epicondilitis",
+              "english": "tennis elbow",
+              "french": "l'épicondylite",
+              "tip": "patients say codo de tenista"
+            },
+            {
+              "spanish": "la fascitis plantar",
+              "english": "plantar fasciitis",
+              "french": "la fasciite plantaire",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L5U3",
+          "name": "Evaluación",
+          "english": "Assessment",
+          "lesson": [
+            "Voy a + infinitive (I'm going to …) lets you announce each step of the exam, which reassures the patient.",
+            "Ask patients to compare sides: el lado derecho, el lado izquierdo."
+          ],
+          "examples": [
+            "Voy a evaluar su hombro.",
+            "¿Siente lo mismo en los dos lados?"
+          ],
+          "items": [
+            {
+              "spanish": "la amplitud de movimiento",
+              "english": "range of motion",
+              "french": "l'amplitude de mouvement",
+              "tip": ""
+            },
+            {
+              "spanish": "la fuerza",
+              "english": "strength",
+              "french": "la force",
+              "tip": ""
+            },
+            {
+              "spanish": "la postura",
+              "english": "posture",
+              "french": "la posture",
+              "tip": ""
+            },
+            {
+              "spanish": "la marcha",
+              "english": "gait",
+              "french": "la marche",
+              "tip": ""
+            },
+            {
+              "spanish": "el equilibrio",
+              "english": "balance",
+              "french": "l'équilibre",
+              "tip": ""
+            },
+            {
+              "spanish": "la palpación",
+              "english": "palpation",
+              "french": "la palpation",
+              "tip": ""
+            },
+            {
+              "spanish": "la prueba",
+              "english": "test",
+              "french": "le test",
+              "tip": ""
+            },
+            {
+              "spanish": "la sensibilidad",
+              "english": "sensation",
+              "french": "la sensibilité",
+              "tip": ""
+            },
+            {
+              "spanish": "los reflejos",
+              "english": "reflexes",
+              "french": "les réflexes",
+              "tip": ""
+            },
+            {
+              "spanish": "Voy a evaluar su hombro.",
+              "english": "I'm going to assess your shoulder.",
+              "french": "Je vais évaluer votre épaule.",
+              "tip": ""
+            },
+            {
+              "spanish": "Voy a palpar la zona.",
+              "english": "I'm going to palpate the area.",
+              "french": "Je vais palper la région.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Siente lo mismo en los dos lados?",
+              "english": "Do you feel the same on both sides?",
+              "french": "Sentez-vous la même chose des deux côtés ?",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L5U4",
+          "name": "Tratamiento",
+          "english": "Treatment",
+          "lesson": [
+            "Voy a also works for treatment: Voy a hacer una movilización.",
+            "Dar de alta means to discharge a patient: Le doy de alta."
+          ],
+          "examples": [
+            "la terapia manual",
+            "el fortalecimiento",
+            "la punción seca"
+          ],
+          "items": [
+            {
+              "spanish": "el tratamiento",
+              "english": "treatment",
+              "french": "le traitement",
+              "tip": ""
+            },
+            {
+              "spanish": "la terapia manual",
+              "english": "manual therapy",
+              "french": "la thérapie manuelle",
+              "tip": ""
+            },
+            {
+              "spanish": "la movilización",
+              "english": "mobilization",
+              "french": "la mobilisation",
+              "tip": ""
+            },
+            {
+              "spanish": "el masaje",
+              "english": "massage",
+              "french": "le massage",
+              "tip": ""
+            },
+            {
+              "spanish": "el estiramiento",
+              "english": "stretching",
+              "french": "l'étirement",
+              "tip": ""
+            },
+            {
+              "spanish": "el fortalecimiento",
+              "english": "strengthening",
+              "french": "le renforcement",
+              "tip": ""
+            },
+            {
+              "spanish": "el ejercicio terapéutico",
+              "english": "therapeutic exercise",
+              "french": "l'exercice thérapeutique",
+              "tip": ""
+            },
+            {
+              "spanish": "la punción seca",
+              "english": "dry needling",
+              "french": "les aiguilles sèches",
+              "tip": ""
+            },
+            {
+              "spanish": "el vendaje",
+              "english": "taping, bandage",
+              "french": "le taping, le bandage",
+              "tip": ""
+            },
+            {
+              "spanish": "la electroterapia",
+              "english": "electrotherapy",
+              "french": "l'électrothérapie",
+              "tip": ""
+            },
+            {
+              "spanish": "el calor",
+              "english": "heat",
+              "french": "la chaleur",
+              "tip": ""
+            },
+            {
+              "spanish": "la férula",
+              "english": "splint",
+              "french": "l'orthèse",
+              "tip": ""
+            },
+            {
+              "spanish": "las muletas",
+              "english": "crutches",
+              "french": "les béquilles",
+              "tip": ""
+            },
+            {
+              "spanish": "el alta",
+              "english": "discharge (from care)",
+              "french": "le congé",
+              "tip": "dar de alta = to discharge"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "L6",
+      "number": 6,
+      "name": "Comunicación clínica",
+      "english": "Advanced clinical communication",
+      "cefr": "C1",
+      "units": [
+        {
+          "id": "L6U1",
+          "name": "Vestibular",
+          "english": "Dizziness and vertigo",
+          "lesson": [
+            "Patients rarely use vértigo precisely. Ask whether things spin (da vueltas) or whether they feel unsteady (inestable).",
+            "Al + infinitive means when doing something: al girarse en la cama = when turning over in bed."
+          ],
+          "examples": [
+            "¿Siente que todo da vueltas?",
+            "Mantenga los ojos abiertos y mire mi nariz."
+          ],
+          "items": [
+            {
+              "spanish": "el vértigo",
+              "english": "vertigo",
+              "french": "le vertige",
+              "tip": ""
+            },
+            {
+              "spanish": "la inestabilidad",
+              "english": "unsteadiness",
+              "french": "l'instabilité",
+              "tip": ""
+            },
+            {
+              "spanish": "la oscilopsia",
+              "english": "oscillopsia",
+              "french": "l'oscillopsie",
+              "tip": ""
+            },
+            {
+              "spanish": "las náuseas",
+              "english": "nausea",
+              "french": "les nausées",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Siente que todo da vueltas?",
+              "english": "Do you feel like everything is spinning?",
+              "french": "Avez-vous l'impression que tout tourne ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿El mareo aparece al girarse en la cama?",
+              "english": "Does the dizziness come on when you turn over in bed?",
+              "french": "L'étourdissement apparaît-il quand vous vous tournez dans le lit ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cuánto dura el mareo?",
+              "english": "How long does the dizziness last?",
+              "french": "Combien de temps dure l'étourdissement ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Oye zumbidos?",
+              "english": "Do you hear ringing?",
+              "french": "Entendez-vous des bourdonnements ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Voy a mover su cabeza rápidamente.",
+              "english": "I'm going to move your head quickly.",
+              "french": "Je vais bouger votre tête rapidement.",
+              "tip": ""
+            },
+            {
+              "spanish": "Mantenga los ojos abiertos y mire mi nariz.",
+              "english": "Keep your eyes open and look at my nose.",
+              "french": "Gardez les yeux ouverts et regardez mon nez.",
+              "tip": ""
+            },
+            {
+              "spanish": "la maniobra de reposicionamiento",
+              "english": "repositioning maneuver",
+              "french": "la manœuvre de repositionnement",
+              "tip": ""
+            },
+            {
+              "spanish": "el vértigo posicional paroxístico benigno",
+              "english": "BPPV",
+              "french": "le vertige positionnel paroxystique bénin",
+              "tip": ""
+            },
+            {
+              "spanish": "Es normal sentir mareo durante la maniobra.",
+              "english": "It's normal to feel dizzy during the maneuver.",
+              "french": "Il est normal d'être étourdi pendant la manœuvre.",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L6U2",
+          "name": "Explicar y educar",
+          "english": "Explaining and educating",
+          "lesson": [
+            "After Es importante que, Le recomiendo que and El objetivo es que, Spanish uses the subjunctive, like French il faut que: que siga, que haga, que vuelva.",
+            "Short, calm sentences work best for pain education. Learn these as models and adapt them."
+          ],
+          "examples": [
+            "El dolor no siempre significa daño.",
+            "Es importante que siga moviéndose."
+          ],
+          "items": [
+            {
+              "spanish": "El dolor no siempre significa daño.",
+              "english": "Pain doesn't always mean damage.",
+              "french": "La douleur ne signifie pas toujours une lésion.",
+              "tip": ""
+            },
+            {
+              "spanish": "Es normal sentir un poco de molestia.",
+              "english": "It's normal to feel a little discomfort.",
+              "french": "Il est normal de ressentir un peu d'inconfort.",
+              "tip": ""
+            },
+            {
+              "spanish": "Es importante que siga moviéndose.",
+              "english": "It's important that you keep moving.",
+              "french": "Il est important que vous continuiez à bouger.",
+              "tip": ""
+            },
+            {
+              "spanish": "Le recomiendo que haga los ejercicios cada día.",
+              "english": "I recommend you do the exercises every day.",
+              "french": "Je vous recommande de faire les exercices chaque jour.",
+              "tip": ""
+            },
+            {
+              "spanish": "Hay que fortalecer los músculos de la cadera.",
+              "english": "The hip muscles need strengthening.",
+              "french": "Il faut renforcer les muscles de la hanche.",
+              "tip": ""
+            },
+            {
+              "spanish": "La recuperación suele tardar de seis a ocho semanas.",
+              "english": "Recovery usually takes six to eight weeks.",
+              "french": "La récupération prend habituellement de six à huit semaines.",
+              "tip": ""
+            },
+            {
+              "spanish": "El objetivo es que vuelva a correr sin dolor.",
+              "english": "The goal is for you to run again without pain.",
+              "french": "L'objectif est que vous puissiez recourir sans douleur.",
+              "tip": ""
+            },
+            {
+              "spanish": "Su cuerpo se adapta poco a poco.",
+              "english": "Your body adapts little by little.",
+              "french": "Votre corps s'adapte petit à petit.",
+              "tip": ""
+            },
+            {
+              "spanish": "Vamos a mejorar la movilidad.",
+              "english": "We're going to improve your mobility.",
+              "french": "Nous allons améliorer votre mobilité.",
+              "tip": ""
+            },
+            {
+              "spanish": "Si el dolor aumenta, reduzca la intensidad.",
+              "english": "If the pain increases, reduce the intensity.",
+              "french": "Si la douleur augmente, réduisez l'intensité.",
+              "tip": ""
+            }
+          ]
+        },
+        {
+          "id": "L6U3",
+          "name": "La conversación clínica",
+          "english": "The clinical conversation",
+          "lesson": [
+            "Ask before touching: ¿Me da permiso para …? is polite and clear.",
+            "Según (according to) and parece que (it seems that) let you share findings without sounding absolute."
+          ],
+          "examples": [
+            "¿Me da permiso para tocarle el hombro?",
+            "¿Tiene alguna pregunta?"
+          ],
+          "items": [
+            {
+              "spanish": "¿Me da permiso para tocarle el hombro?",
+              "english": "May I touch your shoulder?",
+              "french": "Me permettez-vous de toucher votre épaule ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Según la evaluación, parece que es muscular.",
+              "english": "From the assessment, it seems to be muscular.",
+              "french": "Selon l'évaluation, il semble que ce soit musculaire.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Está de acuerdo con el plan de tratamiento?",
+              "english": "Do you agree with the treatment plan?",
+              "french": "Êtes-vous d'accord avec le plan de traitement ?",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Tiene alguna pregunta?",
+              "english": "Do you have any questions?",
+              "french": "Avez-vous des questions ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Si nota hormigueo o pérdida de fuerza, avíseme enseguida.",
+              "english": "If you notice tingling or loss of strength, tell me right away.",
+              "french": "Si vous remarquez des fourmillements ou une perte de force, avisez-moi tout de suite.",
+              "tip": ""
+            },
+            {
+              "spanish": "Le voy a derivar a su médico.",
+              "english": "I'm going to refer you to your doctor.",
+              "french": "Je vais vous diriger vers votre médecin.",
+              "tip": ""
+            },
+            {
+              "spanish": "Le haré un informe para su médico.",
+              "english": "I'll write a report for your doctor.",
+              "french": "Je vais faire un rapport pour votre médecin.",
+              "tip": ""
+            },
+            {
+              "spanish": "¿Cómo le fue la semana con los ejercicios?",
+              "english": "How did the week go with the exercises?",
+              "french": "Comment s'est passée la semaine avec les exercices ?",
+              "tip": ""
+            },
+            {
+              "spanish": "Ha mejorado mucho, ¡enhorabuena!",
+              "english": "You've improved a lot, congratulations!",
+              "french": "Vous vous êtes beaucoup amélioré, félicitations !",
+              "tip": ""
+            },
+            {
+              "spanish": "Vamos a ajustar el programa.",
+              "english": "We're going to adjust the program.",
+              "french": "Nous allons ajuster le programme.",
+              "tip": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

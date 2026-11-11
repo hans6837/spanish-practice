@@ -34,9 +34,21 @@
       return "<p>" + esc(p.trim()).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>") + "</p>";
     }).join("");
   }
+  // Tips written for both accents ("THE-ro (Spain) / SE-ro"): keep the half
+  // for the chosen accent.
+  function accentTip(tip) {
+    tip = String(tip || "");
+    var parts = tip.split(" / ");
+    if (parts.length !== 2) return tip;
+    var single = function (t) { return /^[A-Za-zÁÉÍÓÚÑÜáéíóúñü-]+$/.test(t.trim()); };
+    var marked = /\((Spain|España)\)/i.test(parts[0]);
+    if (!marked && !(single(parts[0]) && single(parts[1]))) return tip;
+    var pick = store.settings().accent === "es-MX" ? parts[1] : parts[0];
+    return pick.replace(/\s*\((Spain|España|Latin America|Latinoamérica|Mexico|México)\)\s*/gi, " ").trim();
+  }
   // Pronunciation guide: the stressed syllable (in CAPITALS) is shown in bold.
   function tipHtml(tip) {
-    return esc(tip).replace(/[A-Za-zÁÉÍÓÚÑÜáéíóúñü]+/g, function (m, off, str) {
+    return esc(accentTip(tip)).replace(/[A-Za-zÁÉÍÓÚÑÜáéíóúñü]+/g, function (m, off, str) {
       var upper = m === m.toUpperCase() && m !== m.toLowerCase();
       if (!upper) return m;
       if (m.length > 1 || str[off - 1] === "-" || str[off + m.length] === "-") return "<b>" + m + "</b>";
@@ -82,6 +94,7 @@
     if (up) {
       var p = store.unitProgress(up), lvl = state.course.levels[up.levelIndex];
       $("next-card").innerHTML = '<div class="eyebrow">Up next</div><div class="next-title">' + esc(up.title) + '</div>' +
+        (up.subtitle ? '<div class="u-sub">' + esc(up.subtitle) + "</div>" : "") +
         '<div class="meta">Level ' + lvl.number + " · " + esc(lvl.title) + "</div>" +
         '<div class="next-bar">' + bar(p.pct) + " <span>" + p.pct + "% learned</span></div>" +
         '<button class="big next" data-unit="' + esc(up.id) + '">Start ▶</button>';
@@ -113,6 +126,7 @@
           var p = store.unitProgress(u, now);
           return '<button class="unit-row' + (p.isLearned ? " learned" : "") + (up && up.id === u.id ? " current" : "") + '" data-unit="' + esc(u.id) + '">' +
             '<span class="u-title">' + (p.isLearned ? "✓ " : "") + esc(u.title) + "</span>" +
+            (u.subtitle ? '<span class="u-sub">' + esc(u.subtitle) + "</span>" : "") +
             '<span class="u-bar">' + bar(p.pct, p.isLearned ? "good" : "") + '<span class="u-pct">' + p.pct + "%</span></span>" +
             '<span class="u-meta">' + p.total + (p.total === 1 ? " item" : " items") + (p.due ? ' · <span class="due">' + p.due + " due</span>" : "") + "</span></button>";
         }).join("") + "</div></section>";
@@ -127,12 +141,13 @@
     var l = state.levels[u.levelIndex];
     $("unit-level").textContent = (l.custom ? "My words" : "Level " + l.number + " · " + l.title);
     $("unit-title").textContent = u.title;
+    $("unit-subtitle").textContent = u.subtitle || "";
     renderUnitProgress();
     $("unit-lesson").innerHTML = u.lesson ? rich(u.lesson) : "";
     $("unit-lesson").classList.toggle("hidden", !u.lesson);
     $("unit-examples").innerHTML = u.examples.map(function (e, i) {
       return '<div class="example"><div class="ex-text"><div class="ex-es">' + esc(e.es) + "</div>" +
-        '<div class="meta">' + esc(e.en) + (e.fr ? " · " + esc(e.fr) : "") + "</div>" +
+        (e.en || e.fr ? '<div class="meta">' + esc(e.en) + (e.en && e.fr ? " · " : "") + esc(e.fr) + "</div>" : "") +
         (e.tip ? '<div class="ex-tip">' + tipHtml(e.tip) + "</div>" : "") + "</div>" +
         '<div class="ex-btns"><button class="mid" data-say="' + i + '">🔊 Listen</button><button class="mid" data-say="' + i + '" data-slow="1">🐢 Slow</button></div></div>';
     }).join("");
@@ -229,6 +244,7 @@
     $("es").textContent = it.es; $("en").textContent = it.en || "—";
     $("fr").textContent = it.fr || "—"; $("tip").innerHTML = it.tip ? tipHtml(it.tip) : "—";
     reveal(false);
+    $("btn-reveal").textContent = it.tip ? "Show tip & French" : "Show French";
     $("why").textContent = (WHY[why] ? WHY[why] + " · " : "") + entry.unit.title;
     $("result").classList.add("hidden");
     $("btn-me").disabled = true;
@@ -239,6 +255,7 @@
   }
   function reveal(on) {
     each(".reveal", function (el) { el.classList.toggle("hidden", !on); });
+    if (on && state.entry && !state.entry.item.tip) $("tip-line").classList.add("hidden");
     $("btn-reveal").classList.toggle("hidden", on);
   }
   function listen(slow, auto) {

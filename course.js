@@ -46,7 +46,9 @@
     levels: ["levels", "niveles", "course", "curso"],
     units: ["units", "unidades", "lessons", "lecciones", "modules", "modulos", "módulos", "chapters"],
     title: ["title", "titulo", "título", "name", "nombre", "heading"],
-    subtitle: ["subtitle", "level", "nivel", "cefr", "code", "label", "description", "descripcion", "descripción"],
+    subtitle: ["subtitle", "english", "en", "description", "descripcion", "descripción", "label"],
+    cefr: ["cefr", "mcer", "level_code", "levelCode"],
+    id: ["id", "code", "codigo", "código"],
     lesson: ["lesson", "leccion", "lección", "lesson_text", "lessonText", "explanation", "explicacion", "explicación", "intro", "text", "theory", "content"],
     examples: ["examples", "example_phrases", "examplePhrases", "ejemplos", "frases", "phrases_examples"],
     items: ["items", "practice", "practica", "práctica", "exercises", "ejercicios", "words", "phrases", "palabras", "vocabulary", "vocabulario"],
@@ -73,7 +75,8 @@
       var unitsRaw = list(pick(lv, F.units));
       var units = unitsRaw.map(function (u, ui) {
         var uTitle = text(pick(u, F.title)) || ("Unit " + (ui + 1));
-        var id = "L" + (li + 1) + "-" + (slug(uTitle) || "u" + (ui + 1));
+        var fileId = text(pick(u, F.id));
+        var id = fileId ? "U-" + slug(fileId) : "L" + (li + 1) + "-" + (slug(uTitle) || "u" + (ui + 1));
         while (seenUnitIds[id]) id += "-" + (ui + 1);
         seenUnitIds[id] = true;
         var examples = list(pick(u, F.examples)).map(readEntry).filter(function (e) { return e.es; });
@@ -88,12 +91,21 @@
           items.push(e);
         });
         report.units++; report.items += items.length; report.examples += examples.length;
-        return { id: id, title: uTitle, lesson: text(pick(u, F.lesson)), examples: examples, items: items,
+        return { id: id, title: uTitle, subtitle: text(pick(u, F.subtitle)), lesson: text(pick(u, F.lesson)), examples: examples, items: items,
                  levelIndex: li, unitIndex: ui };
       });
       report.levels++;
-      return { index: li, number: li + 1, title: lTitle, subtitle: text(pick(lv, F.subtitle)), units: units };
+      var sub = [text(pick(lv, F.subtitle)), text(pick(lv, F.cefr))].filter(Boolean).join(" · ");
+      return { index: li, number: li + 1, title: lTitle, subtitle: sub, units: units };
     });
+    // Example phrases given as plain text: borrow the translation and tip
+    // from the same phrase if it is also a practice item somewhere.
+    var byKey = {};
+    levels.forEach(function (l) { l.units.forEach(function (u) { u.items.forEach(function (it) { if (!byKey[it.key]) byKey[it.key] = it; }); }); });
+    levels.forEach(function (l) { l.units.forEach(function (u) { u.examples.forEach(function (e) {
+      var m = byKey[itemKey(e.es)] || byKey[itemKey("el " + e.es)] || byKey[itemKey("la " + e.es)] || byKey[itemKey("los " + e.es)] || byKey[itemKey("las " + e.es)];
+      if (m) { e.en = e.en || m.en; e.fr = e.fr || m.fr; e.tip = e.tip || m.tip; }
+    }); }); });
     return { levels: levels, report: report };
   }
 

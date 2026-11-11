@@ -27,4 +27,10 @@ global.window = undefined;
 const decks = { decks: ["Basics"], items: [{ id: "basics-01", deck: "Basics", es: "Hola", en: "Hello", fr: "Bonjour" }] };
 const c3 = Course.fromDecks(decks);
 assert.strictEqual(c3.levels[0].units[0].items[0].key, "hola");
+// 5. The real course file reads completely
+const real = Course.normalize(JSON.parse(fs.readFileSync(__dirname + "/../spanish_course.json", "utf8")));
+assert.deepStrictEqual([real.report.levels, real.report.units, real.report.items, real.report.skipped.length], [6, 25, 309, 0]);
+assert.strictEqual(real.levels[0].units[0].title, "Las cinco vocales");
+assert.strictEqual(real.levels[0].subtitle, "Sounds · Pre-A1");
+assert.strictEqual(real.levels[0].units[0].examples[1].en, "house", "example phrases borrow the item's translation");
 console.log("ALL COURSE TESTS PASSED (" + c.report.units + " units, " + c.report.items + " items in sample)");
